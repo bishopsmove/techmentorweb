@@ -28,6 +28,7 @@ describe("authButton.ts", () => {
             currentRoute: {
                 meta: {
                     requiresAuth: false,
+                    signOutToHome: false,
                     signInTarget: signInTarget
                 }
             },
@@ -48,6 +49,29 @@ describe("authButton.ts", () => {
         };
 
         sut.configure(location);         
+    });
+    
+    describe("click", () => {
+        it("invokes signIn when not authenticated", () => {
+            store.getters.idToken = undefined;
+
+            spyOn(sut, "signIn");
+            spyOn(sut, "signOut");
+
+            sut.click();
+
+            expect(sut.signIn).toHaveBeenCalled();
+            expect(sut.signOut).not.toHaveBeenCalled();
+        });
+        it("invokes signOut when authenticated", () => {
+            spyOn(sut, "signIn");
+            spyOn(sut, "signOut");
+
+            sut.click();
+
+            expect(sut.signIn).not.toHaveBeenCalled();
+            expect(sut.signOut).toHaveBeenCalled();
+        });
     });
     
     describe("signIn", () => {
@@ -88,8 +112,12 @@ describe("authButton.ts", () => {
             sut.signOut();
 
             expect(store.commit).toHaveBeenCalledWith("accessToken", "");
+            expect(store.commit).toHaveBeenCalledWith("email", "");
+            expect(store.commit).toHaveBeenCalledWith("firstName", "");
             expect(store.commit).toHaveBeenCalledWith("idToken", "");
             expect(store.commit).toHaveBeenCalledWith("isAdministrator", "");
+            expect(store.commit).toHaveBeenCalledWith("lastName", "");
+            expect(store.commit).toHaveBeenCalledWith("tokenExpires", "");
         });
         it("does not redirect if current route lacks meta", () => {
             spyOn(router, "push");
@@ -119,18 +147,30 @@ describe("authButton.ts", () => {
             expect(router.push).toHaveBeenCalled();
             expect(data.name).toEqual("home");
         });
+        it("redirects to home if current route requires sign out to home", () => {
+            spyOn(router, "push");
+
+            router.currentRoute.meta.signOutToHome = true;
+            
+            sut.signOut();
+
+            let data = router.push.calls.argsFor(0)[0];
+
+            expect(router.push).toHaveBeenCalled();
+            expect(data.name).toEqual("home");
+        });
     });
     
-    describe("tooltip", () => {
+    describe("text", () => {
         it("returns correct message when authenticated", () => {
-            let actual = sut.tooltip();
+            let actual = sut.text;
 
             expect(actual).toEqual("Sign out");
         });
         it("returns correct message when not authenticated", () => {
             store.getters.idToken = undefined;
 
-            let actual = sut.tooltip();
+            let actual = sut.text;
 
             expect(actual).toEqual("Sign in");
         });

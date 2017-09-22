@@ -9,8 +9,12 @@ describe("store.ts", () => {
     beforeEach(() => {
         vuex = <StoreData>{
             accessToken: "This is the access token",
+            email: "here@there.com",
+            firstName: "George",
             isAdministrator: true,
-            idToken: "This is the id token"
+            idToken: "This is the id token",
+            lastName: "Brown",
+            tokenExpires: 1505118903
         };
         sut = new DataStore();
     });
@@ -40,6 +44,54 @@ describe("store.ts", () => {
             let actual = sut.accessToken;
 
             expect(actual).toEqual(vuex.accessToken);
+        });
+    });
+
+    describe("email", () => {
+        it("returns empty when vuex data is null", () => {
+            store.set("vuex", null);
+
+            let actual = sut.email;
+
+            expect(actual).toEqual("");
+        });
+        it("returns empty when vuex data is undefined", () => {
+            store.set("vuex", undefined);
+
+            let actual = sut.email;
+
+            expect(actual).toEqual("");
+        });
+        it("returns token from storage", () => {
+            store.set("vuex", vuex);
+
+            let actual = sut.email;
+
+            expect(actual).toEqual(vuex.email);
+        });
+    });
+
+    describe("firstName", () => {
+        it("returns empty when vuex data is null", () => {
+            store.set("vuex", null);
+
+            let actual = sut.firstName;
+
+            expect(actual).toEqual("");
+        });
+        it("returns empty when vuex data is undefined", () => {
+            store.set("vuex", undefined);
+
+            let actual = sut.firstName;
+
+            expect(actual).toEqual("");
+        });
+        it("returns token from storage", () => {
+            store.set("vuex", vuex);
+
+            let actual = sut.firstName;
+
+            expect(actual).toEqual(vuex.firstName);
         });
     });
 
@@ -88,6 +140,54 @@ describe("store.ts", () => {
             let actual = sut.idToken;
 
             expect(actual).toEqual(vuex.idToken);
+        });
+    });
+    
+    describe("lastName", () => {
+        it("returns empty when vuex data is null", () => {
+            store.set("vuex", null);
+
+            let actual = sut.lastName;
+
+            expect(actual).toEqual("");
+        });
+        it("returns empty when vuex data is undefined", () => {
+            store.set("vuex", undefined);
+
+            let actual = sut.lastName;
+
+            expect(actual).toEqual("");
+        });
+        it("returns token from storage", () => {
+            store.set("vuex", vuex);
+
+            let actual = sut.lastName;
+
+            expect(actual).toEqual(vuex.lastName);
+        });
+    });
+
+    describe("tokenExpires", () => {
+        it("returns zero when vuex data is null", () => {
+            store.set("vuex", null);
+
+            let actual = sut.tokenExpires;
+
+            expect(actual).toEqual(0);
+        });
+        it("returns zero when vuex data is undefined", () => {
+            store.set("vuex", undefined);
+
+            let actual = sut.tokenExpires;
+
+            expect(actual).toEqual(0);
+        });
+        it("returns expires from storage", () => {
+            store.set("vuex", vuex);
+
+            let actual = sut.tokenExpires;
+            console.log(typeof actual);
+            expect(actual).toEqual(vuex.tokenExpires);
         });
     });
 });

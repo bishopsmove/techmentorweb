@@ -1,5 +1,9 @@
 export default class StoreData {
     accessToken: string;
-    isAdministrator: boolean;
+    email: string;
+    firstName: string;
     idToken: string;
+    isAdministrator: boolean;
+    lastName: string;
+    tokenExpires: number;
 }

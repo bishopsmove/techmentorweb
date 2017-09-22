@@ -1,20 +1,20 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
-import { IAuthenticator, Authenticator } from "./authenticator";
+import { IAuthenticationService, AuthenticationService } from "../../services/authentication/authenticationService";
 
 @Component
 export default class SignIn extends AuthComponent {
-    private authenticator: IAuthenticator;
+    private authenticationService: IAuthenticationService;
 
     public constructor() {
         super();
 
-        this.authenticator = new Authenticator();
+        this.authenticationService = new AuthenticationService();
     }
 
     public configure(
-        authenticator: IAuthenticator): void {
-        this.authenticator = authenticator;
+        authenticationService: IAuthenticationService): void {
+        this.authenticationService = authenticationService;
     }
 
     public mounted(): Promise<void> {
@@ -47,28 +47,34 @@ export default class SignIn extends AuthComponent {
     }
 
     public async Authenticate(): Promise<Boolean> {
-        if (this.isAuthenticated()) {
+        if (this.isAuthenticated()
+            && !this.sessionExpired()) {
             // The user already has an auth session
-            console.log("User is already authenticated");
+            return true;
+        }
+        else if (this.authenticationService.IsAuthResponse()) {
+            // The user does not yet have an auth session
+            let response = await this.authenticationService.ProcessAuthResponse();
+
+            // Store session context
+            this.$store.commit("accessToken", response.accessToken);
+            this.$store.commit("email", response.email);
+            this.$store.commit("firstName", response.firstName);
+            this.$store.commit("idToken", response.idToken);
+            this.$store.commit("isAdministrator", response.isAdministrator);
+            this.$store.commit("lastName", response.lastName);
+            this.$store.commit("tokenExpires", response.tokenExpires);
 
             return true;
         }
         else {
             // The user does not yet have an auth session
-            console.log("Authenticating");
-            let response = await this.authenticator.Authenticate();
+            let redirectUri = this.getRedirectUri();
 
-            if (response) {
-                // Store session context
-                this.$store.commit("idToken", response.idToken);
-                this.$store.commit("accessToken", response.accessToken);
-                this.$store.commit("isAdministrator", response.isAdministrator);
-
-                return true;
-            } else {
-                // We are redirecting to authenticate
-                return false;
-            }
+            this.authenticationService.Authenticate(redirectUri);
+            
+            // We are redirecting to authenticate
+            return false;
         }
     };
 

@@ -17,6 +17,15 @@ export default class AuthButton extends AuthComponent {
         this.location = location;
     }
 
+    public click(): void {
+        if (this.isAuthenticated()) {
+            this.signOut();
+        }
+        else {
+            this.signIn();
+        }
+    }
+
     public signIn(): void {
         // Check if the current route has a sign in target
         let signInTarget = this.signInTarget();
@@ -29,8 +38,12 @@ export default class AuthButton extends AuthComponent {
         let requiresRedirect = this.signOutRequiresRedirect();
 
         this.$store.commit("accessToken", "");
-        this.$store.commit("isAdministrator", "");
+        this.$store.commit("email", "");
+        this.$store.commit("firstName", "");
         this.$store.commit("idToken", "");
+        this.$store.commit("isAdministrator", "");
+        this.$store.commit("lastName", "");
+        this.$store.commit("tokenExpires", "");
 
         if (requiresRedirect) {
             this.$router.push({ name: "home"});
@@ -45,6 +58,10 @@ export default class AuthButton extends AuthComponent {
         }
 
         if (route.meta.requiresAuth) {
+            return true;
+        }
+
+        if (route.meta.signOutToHome) {
             return true;
         }
 
@@ -73,12 +90,11 @@ export default class AuthButton extends AuthComponent {
         return targetRoute.href;
     }
 
-    public tooltip(): string {
+    public get text(): string {
         if (this.isAuthenticated()) {
             return "Sign out";
         }
 
         return "Sign in";
     };
-
 };

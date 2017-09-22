@@ -1,34 +1,297 @@
 <div>
-    <h1>Profile</h1>
-
-    <fieldset>
-        <legend>Profile</legend>
-        <form>
-            <div>
-                <label for="firstName">First Name</label>
-                <input id="firstName" name="firstName" type="text" title="First Name" autofocus="autofocus" placeholder="First Name" maxlength="50" required="required" v-model="model.firstName" v-validate data-vv-rules="required" />
-                <span v-show="errors.has('firstName')">{{ errors.first('firstName') }}</span>
-            </div>
-            <div>
-                <label for="lastName">Last Name</label>
-                <input id="lastName" name="lastName" type="text" title="Last Name"placeholder="Last Name" maxlength="50" required="required" v-model="model.lastName" v-validate data-vv-rules="required" />
-                <span v-show="errors.has('lastName')">{{ errors.first('lastName') }}</span>
-            </div>
-            <div>
-                <label for="email">Email Address</label>
-                <input id="email" name="email" type="email" title="Email Address" placeholder="Email" required="required" maxlength="256" v-model="model.email" v-validate data-vv-rules="required|email" />
-                <span v-show="errors.has('email')">{{ errors.first('email') }}</span>
-            </div>
-            <div>
-                <label for="timeZoneId">Time Zone</label>
-                <select id="timeZoneId" name="timeZoneId" v-model="model.timeZoneId" title="Time Zone">
-                    <option value="" selected="selected" disabled="disabled">Time Zone</option>
-                </select>
-                <span v-show="errors.has('timeZoneId')">{{ errors.first('timeZoneId') }}</span>
-            </div>
-            <div>
-                <button class="btn" @click="save" type="button">Save</button>
-            </div>
-        </form>
-    </fieldset>
+    <div v-if="loading" class="text-xs-center">
+        <v-progress-circular indeterminate v-bind:size="75" class="primary--text"></v-progress-circular>
+        <p class="ma-3 subheading">Loading your profile, please wait...</p>
+    </div>  
+    <v-alert warning :value="isHidden()">
+      Your account is currently hidden and will not be publicly visible.
+    </v-alert>
+    <v-alert error :value="isBanned()">
+      Your account has been banned and will not be publicly visible.
+    </v-alert>
+    <v-form v-if="!loading" data-vv-scope="profileForm">
+        <h6>Profile</h6>                
+        <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+                <v-flex xs6>
+                    <v-select
+                        name="status"
+                        label="Status"
+                        title="Status"
+                        item-text="name"
+                        item-value="value"
+                        v-bind:items="statuses"
+                        v-model="model.status">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="email"
+                        label="Email Address"
+                        title="Email Address"
+                        required
+                        autocomplete="off"
+                        v-model="model.email"
+                        :error-messages="errors.collect('email')"
+                        data-vv-scope="profileForm"
+                        v-validate="'required|email'">
+                    </v-text-field>
+                    <p xs6 class="text-xs-left"><strong>NOTE:</strong> Your email address will only be made available to administrators and will not be publicly displayed.</p>
+                </v-flex>
+            </v-layout>
+        </v-container>   
+        <h6>Personal</h6> 
+        <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+                <v-flex xs6>
+                    <v-text-field
+                        name="firstName"
+                        label="First Name"
+                        title="First Name"
+                        maxlength="50"
+                        required
+                        autocomplete="off"
+                        :autofocus="true"
+                        v-model="model.firstName"
+                        :error-messages="errors.collect('firstName')"
+                        data-vv-scope="profileForm"
+                        v-validate="'required'">
+                    </v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="lastName"
+                        label="Last Name"
+                        title="Last Name"
+                        maxlength="50"
+                        required
+                        autocomplete="off"
+                        v-model="model.lastName"
+                        :error-messages="errors.collect('lastName')"
+                        data-vv-scope="profileForm"
+                        v-validate="'required'">
+                    </v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                    <v-select
+                        name="birthYear"
+                        label="Birth Year"
+                        title="Birth Year"
+                        autocomplete
+                        item-text="name"
+                        item-value="value"
+                        v-bind:items="birthYears"
+                        v-model="model.birthYear">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-select
+                        name="gender"
+                        label="Gender"
+                        title="Gender"
+                        item-text="name"
+                        item-value="value"
+                        v-bind:items="genders"
+                        v-model="model.gender">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-select
+                        name="timeZone"
+                        label="Time Zone"
+                        title="Time Zone"
+                        autocomplete
+                        item-text="name"
+                        item-value="value"
+                        v-bind:items="timezones"
+                        v-model="model.timeZone">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-select
+                        name="languages"
+                        label="Spoken Languages"
+                        title="Spoken Languages"
+                        chips
+                        tags
+                        @change="CheckLanguages"
+                        v-bind:items="languages"
+                        v-model="model.languages">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="about"
+                        label="About"
+                        title="About"
+                        autocomplete="off"
+                        v-model="model.about"
+                        @input="CompileMarkdown"
+                        multi-line>
+                    </v-text-field>
+                    <p xs6 class="text-xs-left">The About field supports <a href="https://help.github.com/categories/writing-on-github/" target="_blank">GitHub flavoured markdown</a>. <strong>NOTE:</strong> Images will not be supported due to <a href="https://en.wikipedia.org/wiki/Content_Security_Policy" target="_blank">CSP</a>.</p>
+                </v-flex>
+                <v-flex xs6 class="text-xs-left">
+                    <div class="subheader">About preview</div>
+                    <div v-html="compiledMarkdown" class="ml-3"></div>
+                </v-flex>
+            </v-layout>
+        </v-container>
+        <h6>Technical</h6>
+        <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+                <v-flex xs6>
+                    <v-select
+                        name="yearStartedInTech"
+                        label="Year Started In Tech"
+                        title="Year Started In Tech"
+                        autocomplete
+                        item-text="name"
+                        item-value="value"
+                        v-bind:items="techYears"
+                        v-model="model.yearStartedInTech">
+                    </v-select>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="website"
+                        label="Website"
+                        title="Website"
+                        autocomplete="off"
+                        v-model="model.website"    
+                        :error-messages="errors.collect('profileForm.website')"
+                        data-vv-scope="profileForm"                
+                        v-validate="'url:true'"
+                        :append-icon="model.website ? 'link' : ''"
+                        :append-icon-cb="() => ShowWebsite(model.website)">
+                    </v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="gitHubUsername"
+                        label="GitHub Username"
+                        title="GitHub Username"
+                        autocomplete="off"
+                        v-model="model.gitHubUsername"
+                        :append-icon="model.gitHubUsername ? 'link' : ''"
+                        :append-icon-cb="() => ShowWebsite('https://github.com/' + model.gitHubUsername)">
+                        <!-- 
+                            Currently broken in vuetify due to the label, see https://github.com/vuetifyjs/vuetify/issues/1620
+                            prefix="https://github.com/"
+                         -->
+                    </v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                    <v-text-field
+                        name="twitterUsername"
+                        label="Twitter Username"
+                        title="Twitter Username"
+                        autocomplete="off"
+                        v-model="model.twitterUsername"
+                        :append-icon="model.twitterUsername ? 'link' : ''"
+                        :append-icon-cb="() => ShowWebsite('https://twitter.com/' + model.twitterUsername)">
+                    </v-text-field>
+                </v-flex>
+            </v-layout>
+        </v-container>
+        <h6>Skills</h6>
+        <v-container grid-list-md text-xs-center>
+            <v-layout row wrap>
+                <v-flex v-for="skill in model.skills" :key="skill.name" xs12 class="text-xs-left">
+                    <p>{{skill.name}}, level {{ skill.level || "Unspecified" }}, started from {{ skill.yearStarted || "Unspecified" }}, last used {{ skill.yearLastUsed || "Unspecified" }}</p>
+                </v-flex>
+                <v-flex xs12 class="text-xs-left">
+                    <p v-if="model.skills.length === 0" class="subheading">No skills added yet.</p>
+                    <v-btn @click="OnAddSkill">
+                        Add Skill
+                    </v-btn>
+                </v-flex>
+            </v-layout>
+        </v-container>
+        <v-container>
+            <v-layout row wrap>
+                <v-flex xs12 class="text-xs-right">
+                    <small>* indicates required field</small>
+                </v-flex>
+                <v-flex xs12 class="text-xs-right">
+                    <v-btn primary @click="OnSave">
+                        Save
+                    </v-btn>
+                </v-flex>
+            </v-layout>
+        </v-container>
+    </v-form>
+    <v-dialog v-model="showDialog" persistent width="50%">
+        <v-form data-vv-scope="skillForm">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Skill</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-container grid-list-md>
+                        <v-layout wrap>
+                            <v-flex xs12 sm6>
+                                <v-text-field
+                                    name="name"
+                                    label="Name"
+                                    title="Name"
+                                    required
+                                    autocomplete="off"
+                                    :autofocus="true"
+                                    v-model="skillModel.name"
+                                    :error-messages="errors.collect('name')"
+                                    data-vv-scope="skillForm"
+                                    v-validate="'required'">
+                                </v-text-field>
+                            </v-flex>
+                            <v-flex xs12 sm6>
+                                <v-select
+                                    name="level"
+                                    label="Level"
+                                    required
+                                    item-text="name"
+                                    item-value="value"
+                                    :items="skillLevels"
+                                    v-model="skillModel.level"
+                                    :error-messages="errors.collect('level')"
+                                    data-vv-scope="skillForm"
+                                    v-validate="'required'">
+                                </v-select>
+                            </v-flex>
+                            <v-flex xs12 sm6>
+                                <v-select
+                                    name="yearStarted"
+                                    label="Year Started"
+                                    title="Year Started"
+                                    autocomplete
+                                    item-text="name"
+                                    item-value="value"
+                                    v-bind:items="techYears"
+                                    v-model="skillModel.yearStarted">
+                                </v-select>
+                            </v-flex>
+                            <v-flex xs12 sm6>
+                                <v-select
+                                    name="yearLastUsed"
+                                    label="Year Last Used"
+                                    title="Year Last Used"
+                                    autocomplete
+                                    item-text="name"
+                                    item-value="value"
+                                    v-bind:items="techYears"
+                                    v-model="skillModel.yearLastUsed">
+                                </v-select>
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
+                    <small>*indicates required field</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn class="blue--text darken-1" flat @click="showDialog = false">Close</v-btn>
+                    <v-btn class="blue--text darken-1" flat @click="OnSaveSkill">Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-form>
+    </v-dialog>
 </div>
