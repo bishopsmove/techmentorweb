@@ -11,8 +11,8 @@ export class SkillLevel {
 export class Skill {
         level: string;
         name: string;
-        yearLastUsed?: number;
-        yearStarted?: number;
+        yearLastUsed?: number | null;
+        yearStarted?: number | null;
 };
 
 export class ProfileStatus
