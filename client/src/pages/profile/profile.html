@@ -197,9 +197,9 @@
         <h6>Skills</h6>
         <v-container grid-list-md text-xs-center>
             <v-layout row wrap>
-                <v-flex v-for="skill in model.skills" :key="skill.name" xs12 class="text-xs-left">
+                <v-flex v-for="(skill, index) in model.skills" :key="skill.name" xs12 class="text-xs-left">
                     <p>
-                        <SkillDetails v-model="skill" />
+                        <SkillDetails :skill="model.skills[index]" />
                     </p>
                 </v-flex>
                 <v-flex xs12 class="text-xs-left">

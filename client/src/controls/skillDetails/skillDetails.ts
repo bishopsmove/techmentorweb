@@ -1,26 +1,48 @@
-import Component from "vue-class-component";
+import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
 import { Skill } from "../../services/api/profileService";
 
 @Component
 export default class SkillDetails extends Vue {
-    private _model: Skill = new Skill();
+    
+    @Prop()
+    skill: Skill
+    
+    public DisplayName(): string {
+        if (!this.skill) {
+            return "";
+        }
+
+        if (!this.skill.name) {
+            return "";
+        }
+
+        return this.skill.name;
+    }
 
     public DisplayLevel() : string {
-        if (!this.model.level) {
+        if (!this.skill) {
+            return "";
+        }
+
+        if (!this.skill.level) {
             return "";
         }
  
-        let first = this.model.level[0].toLocaleUpperCase();
-        let remainder = this.model.level.substr(1).toLocaleLowerCase();
+        let first = this.skill.level[0].toLocaleUpperCase();
+        let remainder = this.skill.level.substr(1).toLocaleLowerCase();
 
         return first + remainder;
     }
 
     public DisplayYearRange(): string {
-        if (!this.model.yearStarted) {
-            if (this.model.yearLastUsed) {
-                return "up to " + this.model.yearLastUsed;
+        if (!this.skill) {
+            return "";
+        }
+
+        if (!this.skill.yearStarted) {
+            if (this.skill.yearLastUsed) {
+                return "up to " + this.skill.yearLastUsed;
             }
 
             // Both year values are not supplied
@@ -28,18 +50,11 @@ export default class SkillDetails extends Vue {
         }
 
         // We have a year started
-        if (this.model.yearLastUsed) {
+        if (this.skill.yearLastUsed) {
             // We have a value for both years
-            return "from " + this.model.yearStarted + " to " + this.model.yearLastUsed;
+            return "from " + this.skill.yearStarted + " to " + this.skill.yearLastUsed;
         }
 
-        return "since " + this.model.yearStarted
-    }
-    
-    get model(): Skill {
-        return this._model;
-    }
-    set model(model: Skill) {
-        this._model = model;
+        return "since " + this.skill.yearStarted
     }
 };
