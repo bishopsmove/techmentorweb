@@ -1,5 +1,6 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
+import SkillDetails from "../../controls/skillDetails/skillDetails.vue";
 import { IProfileService, ProfileService, UserProfile, ProfileStatus, Skill } from "../../services/api/profileService";
 import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
@@ -8,7 +9,11 @@ import { ICategoriesService, CategoriesService, Category, CategoryGroup } from "
 import store from "store";
 import marked from "marked";
 
-@Component
+@Component({
+    components: {
+      SkillDetails
+    }
+  })
 export default class Profile extends AuthComponent {
     private profileService: IProfileService;
     private listsService: IListsService;

@@ -197,8 +197,10 @@
         <h6>Skills</h6>
         <v-container grid-list-md text-xs-center>
             <v-layout row wrap>
-                <v-flex v-for="skill in model.skills" :key="skill.name" xs12 class="text-xs-left">
-                    <p>{{skill.name}}, level {{ skill.level || "Unspecified" }}, started from {{ skill.yearStarted || "Unspecified" }}, last used {{ skill.yearLastUsed || "Unspecified" }}</p>
+                <v-flex v-for="(skill, index) in model.skills" :key="skill.name" xs12 class="text-xs-left">
+                    <p>
+                        <SkillDetails :skill="model.skills[index]" />
+                    </p>
                 </v-flex>
                 <v-flex xs12 class="text-xs-left">
                     <p v-if="model.skills.length === 0" class="subheading">No skills added yet.</p>
