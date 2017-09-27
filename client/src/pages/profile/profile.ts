@@ -33,6 +33,7 @@ export default class Profile extends AuthComponent {
     private languages: Array<string> = new Array<string>();
     private skills: Array<string> = new Array<string>();
     private skillModel: Skill = new Skill();
+    private isSkillAdd: boolean = false;
     private showDialog: boolean = false;
 
     public constructor() {
@@ -97,6 +98,7 @@ export default class Profile extends AuthComponent {
     }
 
     public OnAddSkill(): void {
+        this.isSkillAdd = true;
         this.skillModel = new Skill();
 
         // Add default values when missing to fields that should be bound to lists that provide an unspecified value
@@ -113,6 +115,28 @@ export default class Profile extends AuthComponent {
         this.showDialog = true;
     }
 
+    public OnDeleteSkill(skill: Skill): void {
+        if (!this.model) {
+            return;
+        }
+
+        if (!this.model.skills) {
+            return;
+        }
+
+        this.model.skills = this.model.skills.filter(item => item.name !== skill.name);
+    }
+
+    public OnEditSkill(skill: Skill): void {
+        this.isSkillAdd = false;
+        this.skillModel = skill;
+
+        // Ensure any previous validation triggers have been removed
+        this.$validator.reset();
+        
+        this.showDialog = true;
+    }
+
     public async OnSaveSkill(): Promise<void> {        
         let isValid = await this.$validator.validateAll("skillForm");
 
@@ -123,7 +147,11 @@ export default class Profile extends AuthComponent {
         }
         
         this.model.skills = this.model.skills || new Array<Skill>();
-        this.model.skills.push(this.skillModel);
+
+        if (this.isSkillAdd) {
+            // This is an add of a skill
+            this.model.skills.push(this.skillModel);
+        }
 
         this.showDialog = false;
     }

@@ -49,12 +49,26 @@ export default class SkillDetails extends Vue {
             return "";
         }
 
+        let endYear = new Date().getFullYear();
+
+        if (this.skill.yearLastUsed) {
+            endYear = <number>this.skill.yearLastUsed;
+        }
+
+        let totalYears = endYear - this.skill.yearStarted;
+
+        if (totalYears < 1) {
+            // Other than a bug where the start is after the end, this is likely to be that the years are the same
+            // It doesn't make sense to say the user has no experience, so we will use a year as a minimum
+            totalYears = 1;
+        }
+
         // We have a year started
         if (this.skill.yearLastUsed) {
             // We have a value for both years
-            return "from " + this.skill.yearStarted + " to " + this.skill.yearLastUsed;
+            return "over " + totalYears + " years until " + this.skill.yearLastUsed;
         }
 
-        return "since " + this.skill.yearStarted
+        return "over " + totalYears + " years";
     }
 };
