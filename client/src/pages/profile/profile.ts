@@ -137,7 +137,7 @@ export default class Profile extends AuthComponent {
         this.showDialog = true;
     }
 
-    public async OnSaveSkill(): Promise<void> {        
+    public async OnSaveSkill(): Promise<void> {
         let isValid = await this.$validator.validateAll("skillForm");
 
         if (!isValid) {

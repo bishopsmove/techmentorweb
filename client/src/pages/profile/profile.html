@@ -245,11 +245,18 @@
                                     title="Name"
                                     required
                                     autocomplete="off"
-                                    :autofocus="true"
+                                    autofocus="true"
                                     v-model="skillModel.name"
                                     :error-messages="errors.collect('name')"
                                     data-vv-scope="skillForm"
-                                    v-validate="'required'">
+                                    v-validate="'required'"
+                                    v-if="isSkillAdd">
+                                </v-text-field>
+                                <v-text-field
+                                    label="Name"
+                                    v-model="skillModel.name"
+                                    disabled="true"
+                                    v-if="!isSkillAdd">
                                 </v-text-field>
                             </v-flex>
                             <v-flex xs12 sm6>
@@ -296,9 +303,9 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn class="blue--text darken-1" flat @click="showDialog = false" v-if="!isSkillAdd">OK</v-btn>
                     <v-btn class="blue--text darken-1" flat @click="showDialog = false" v-if="isSkillAdd">Close</v-btn>
                     <v-btn class="blue--text darken-1" flat @click="OnSaveSkill" v-if="isSkillAdd">Save</v-btn>
+                    <v-btn class="blue--text darken-1" flat @click="OnSaveSkill" v-if="!isSkillAdd">OK</v-btn>
                 </v-card-actions>
             </v-card>
         </v-form>

@@ -8,7 +8,7 @@ export default class SkillDetails extends Vue {
     @Prop()
     skill: Skill
     
-    public DisplayName(): string {
+    public get DisplayName(): string {
         if (!this.skill) {
             return "";
         }
@@ -20,7 +20,7 @@ export default class SkillDetails extends Vue {
         return this.skill.name;
     }
 
-    public DisplayLevel() : string {
+    public get DisplayLevel() : string {
         if (!this.skill) {
             return "";
         }
@@ -35,7 +35,7 @@ export default class SkillDetails extends Vue {
         return first + remainder;
     }
 
-    public DisplayYearRange(): string {
+    public get DisplayYearRange(): string {
         if (!this.skill) {
             return "";
         }
