@@ -245,7 +245,7 @@
                                     title="Name"
                                     required
                                     autocomplete="off"
-                                    autofocus="true"
+                                    :autofocus="true"
                                     v-model="skillModel.name"
                                     :error-messages="errors.collect('name')"
                                     data-vv-scope="skillForm"
@@ -255,7 +255,7 @@
                                 <v-text-field
                                     label="Name"
                                     v-model="skillModel.name"
-                                    disabled="true"
+                                    :disabled="true"
                                     v-if="!isSkillAdd">
                                 </v-text-field>
                             </v-flex>

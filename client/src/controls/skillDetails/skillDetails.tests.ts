@@ -120,8 +120,8 @@ describe("SkillDetails", () => {
             expect(actual).toEqual("");
         });
         it("returns empty when yearStarted and yearLastUsed are undefined", () => {
-            sut.skill.yearStarted = undefined;
-            sut.skill.yearLastUsed = undefined;
+            sut.skill.yearStarted = <number><any>undefined;
+            sut.skill.yearLastUsed = <number><any>undefined;
 
             let actual = sut.DisplayYearRange;
 
