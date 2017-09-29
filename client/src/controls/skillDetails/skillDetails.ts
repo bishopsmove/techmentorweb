@@ -63,12 +63,18 @@ export default class SkillDetails extends Vue {
             totalYears = 1;
         }
 
+        let yearLabel = "years";
+
+        if (totalYears === 1) {
+            yearLabel = "year";
+        }
+
         // We have a year started
         if (this.skill.yearLastUsed) {
             // We have a value for both years
-            return "over " + totalYears + " years until " + this.skill.yearLastUsed;
+            return "over " + totalYears + " " + yearLabel + " until " + this.skill.yearLastUsed;
         }
 
-        return "over " + totalYears + " years";
+        return "over " + totalYears + " " + yearLabel;
     }
 };

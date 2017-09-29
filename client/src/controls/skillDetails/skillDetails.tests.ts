@@ -128,16 +128,48 @@ describe("SkillDetails", () => {
             expect(actual).toEqual("");
         });
         it("returns range message when yearStarted and yearLastUsed have values", () => {
+            let years = (<number>sut.skill.yearLastUsed - <number>sut.skill.yearStarted);
             let actual = sut.DisplayYearRange;
 
-            expect(actual).toEqual("from " + sut.skill.yearStarted + " to " + sut.skill.yearLastUsed);
+            expect(actual).toEqual("over " + years + " years until " + sut.skill.yearLastUsed);
         });
-        it("returns since message when only yearStarted has a value", () => {
+        it("returns range message of one year when yearStarted is one year less than yearLastUsed", () => {
+            sut.skill.yearLastUsed = <number>sut.skill.yearStarted + 1;
+            let actual = sut.DisplayYearRange;
+
+            expect(actual).toEqual("over 1 year until " + sut.skill.yearLastUsed);
+        });
+        it("returns range message of one year when yearStarted and yearLastUsed are same", () => {
+            sut.skill.yearLastUsed = sut.skill.yearStarted;
+            let actual = sut.DisplayYearRange;
+
+            expect(actual).toEqual("over 1 year until " + sut.skill.yearLastUsed);
+        });
+        it("returns over years message when only yearStarted has a value", () => {
+            let years = (new Date().getFullYear() - <number>sut.skill.yearStarted);
             sut.skill.yearLastUsed = null;
 
             let actual = sut.DisplayYearRange;
 
-            expect(actual).toEqual("since " + sut.skill.yearStarted);
+            expect(actual).toEqual("over " + years + " years");
+        });
+        it("returns over 1 year message when yearStarted is one less than current year", () => {
+            let currentYear = new Date().getFullYear();
+            sut.skill.yearStarted = currentYear - 1;
+            sut.skill.yearLastUsed = null;
+
+            let actual = sut.DisplayYearRange;
+
+            expect(actual).toEqual("over 1 year");
+        });
+        it("returns over 1 year message when yearStarted is current year", () => {
+            let currentYear = new Date().getFullYear();
+            sut.skill.yearStarted = currentYear;
+            sut.skill.yearLastUsed = null;
+
+            let actual = sut.DisplayYearRange;
+
+            expect(actual).toEqual("over 1 year");
         });
         it("returns up to message when only yearLastUsed has a value", () => {
             sut.skill.yearStarted = null;
