@@ -237,18 +237,19 @@ export default class Profile extends AuthComponent {
     private async loadProfile(): Promise<void> {
         try {
             // Get the profile stored before an auth refresh or create a new one
-            let cachedProfile: UserProfile = <UserProfile>store.get("profile");
+            let profile: UserProfile = <UserProfile>store.get("profile");
 
-            if (cachedProfile) {
-                this.model = cachedProfile;
-                
+            if (profile) {
                 this.notify.showInformation("Your authentication session had expired.<br />Please try saving your profile again.");
     
                 store.remove("profile");
             }
             else {
-                this.model = await this.profileService.getAccountProfile();
+                profile = await this.profileService.getAccountProfile();
             }
+
+            // Use a copy constructor to ensure that the type has all fields initialised
+            this.model = new UserProfile(profile);
 
             // Populate first name, last name and email from data store if the values are not found
             if (!this.model.email) {
