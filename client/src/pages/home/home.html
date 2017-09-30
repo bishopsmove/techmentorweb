@@ -8,7 +8,7 @@
     </div>
     <v-container v-if="!loadingLists">
         <v-layout row wrap>
-            <v-flex xs12>
+            <v-flex xs12 sm4>
                 <v-select
                     v-if="skills.length > 0"
                     name="skills"
@@ -16,9 +16,13 @@
                     title="Skills"
                     chips
                     multiple
+                    item-text="name"
+                    item-value="name"
                     v-bind:items="skills"
                     v-model="selectedSkills">
                 </v-select>
+            </v-flex>
+            <v-flex xs12 sm4>
                 <v-select
                 v-if="languages.length > 0"
                     name="languages"
@@ -26,9 +30,13 @@
                     title="Spoken Languages"
                     chips
                     multiple
+                    item-text="name"
+                    item-value="name"
                     v-bind:items="languages"
                     v-model="selectedLanguages">
                 </v-select>
+            </v-flex>
+            <v-flex xs12 sm4>
                 <v-select
                     v-if="genders.length > 0"
                     name="genders"
@@ -36,10 +44,14 @@
                     title="Genders"
                     chips
                     multiple
+                    item-text="name"
+                    item-value="name"
                     v-bind:items="genders"
                     v-model="selectedGenders">
                 </v-select>
             </v-flex>
+        </v-layout>
+        <v-layout row wrap>
             <v-flex xs12>
                 <v-alert warning :value="!FiltersSelected">
                   Please select at least one filter.
@@ -49,6 +61,16 @@
                 <v-btn primary @click="OnSearch" :disabled="!FiltersSelected">
                     Search
                 </v-btn>
+            </v-flex>
+            <v-flex xs12 v-if="searching" class="text-xs-center">
+                <v-progress-circular indeterminate v-bind:size="75" class="primary--text"></v-progress-circular>
+                <p class="ma-3 subheading">Searching profiles, please wait...</p>
+            </v-flex>
+            <v-flex xs12 v-if="searchRun && profiles.length === 0" class="text-xs-center">
+                <p class="ma-3 subheading">No matching profiles found</p>
+            </v-flex>
+            <v-flex v-for="profile in profiles" :key="profile.id" xs12 v-if="profiles.length > 0">
+                <p class="ma-3 subheading">{{ profile.firstName }} {{ profile.lastName }}</p>
             </v-flex>
         </v-layout>
     </v-container>

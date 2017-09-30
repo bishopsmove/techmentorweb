@@ -1,28 +1,40 @@
 import Component from "vue-class-component";
 import Vue from "vue";
+import Failure from "../../services/failure";
+import { INotify, Notify } from "../../services/notify";
 import { ICategoriesService, CategoriesService, Category, CategoryGroup } from "../../services/api/categoriesService";
+import { IProfileService, ProfileService, CategoryFilter, ProfileResult } from "../../services/api/profileService";
 
 @Component
 export default class Home extends Vue {
-    private categoriesService: ICategoriesService
+    private categoriesService: ICategoriesService;
+    private profileService: IProfileService;
+    private notify: INotify;
     
     // Properties for view binding
     private loadingLists: boolean = true;
-    private genders: Array<string> = new Array<string>();
-    private languages: Array<string> = new Array<string>();
-    private skills: Array<string> = new Array<string>();
+    private genders: Array<Category> = new Array<Category>();
+    private languages: Array<Category> = new Array<Category>();
+    private skills: Array<Category> = new Array<Category>();
     private selectedGenders: Array<string> = new Array<string>();
     private selectedLanguages: Array<string> = new Array<string>();
     private selectedSkills: Array<string> = new Array<string>();
+    private searching: boolean = false;
+    private searchRun: boolean = false;
+    private profiles: Array<ProfileResult> = new Array<ProfileResult>();
 
     public constructor() {
         super();
         
         this.categoriesService = new CategoriesService();
+        this.profileService = new ProfileService();
+        this.notify = new Notify();
     }
     
-    public configure(categoriesService: ICategoriesService) {
+    public configure(categoriesService: ICategoriesService, profileService: IProfileService, notify: INotify) {
         this.categoriesService = categoriesService;
+        this.profileService = profileService;
+        this.notify = notify;
     }
 
     public mounted(): Promise<void> {
@@ -35,38 +47,70 @@ export default class Home extends Vue {
         this.genders = categories
             .filter((item: Category) => {
                 return item.group === CategoryGroup.Gender;
-            }).map((item: Category) => {
-                return item.name;
             });
         
         this.languages = categories
             .filter((item: Category) => {
                 return item.group === CategoryGroup.Language;
-            }).map((item: Category) => {
-                return item.name;
             });
 
         this.skills = categories
             .filter((item: Category) => {
                 return item.group === CategoryGroup.Skill;
-            }).map((item: Category) => {
-                return item.name;
             });
             
         this.loadingLists = false;
     }
 
     public async OnSearch(): Promise<void> {
-        // Build up the search
-        this.selectedSkills.forEach(element => {
-            console.log(element);
-        });
-        this.selectedLanguages.forEach(element => {
-            console.log(element);
-        });
-        this.selectedGenders.forEach(element => {
-            console.log(element);
-        });
+        this.searching = true;
+        this.profiles = new Array<ProfileResult>();
+
+        try {
+            let filters = new Array<CategoryFilter>();
+    
+            // Build up the search filters
+            this.selectedSkills.forEach(element => {
+                let filter = <CategoryFilter>{
+                    group: "skill",
+                    name: element
+                };
+    
+                filters.push(filter);
+            });
+            this.selectedLanguages.forEach(element => {
+                let filter = <CategoryFilter>{
+                    group: "language",
+                    name: element
+                };
+    
+                filters.push(filter);
+            });
+            this.selectedGenders.forEach(element => {
+                let filter = <CategoryFilter>{
+                    group: "gender",
+                    name: element
+                };
+    
+                filters.push(filter);
+            });
+    
+            this.profiles = await this.profileService.searchProfiles(filters);
+        }
+        catch (failure) {
+            // Check Failure.visibleToUser
+            if (failure.visibleToUser) {
+                this.notify.showFailure(<Failure>failure);
+            } else {
+                this.notify.showError("Uh oh. Someting went wrong. We will look into it.");
+                
+                throw failure;
+            }
+        }
+        finally {
+            this.searching = false;
+            this.searchRun = true;
+        }
     }
 
     public get FiltersSelected(): boolean {
