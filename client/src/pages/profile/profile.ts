@@ -1,7 +1,8 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
 import SkillDetails from "../../controls/skillDetails/skillDetails.vue";
-import { IProfileService, ProfileService, UserProfile, ProfileStatus, Skill } from "../../services/api/profileService";
+import { Skill } from "../../services/api/skill";
+import { IAccountProfileService, AccountProfileService, AccountProfile, ProfileStatus } from "../../services/api/accountProfileService";
 import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
 import { IListsService, ListsService, ListItem } from "../../services/lists";
@@ -15,7 +16,7 @@ import marked from "marked";
     }
   })
 export default class Profile extends AuthComponent {
-    private profileService: IProfileService;
+    private profileService: IAccountProfileService;
     private listsService: IListsService;
     private categoriesService: ICategoriesService
     private notify: INotify;
@@ -23,7 +24,7 @@ export default class Profile extends AuthComponent {
     // Properties for view binding
     private loading: boolean = true;
     private compiledMarkdown: string = "";
-    private model: UserProfile = new UserProfile();
+    private model: AccountProfile = new AccountProfile();
     private timezones: Array<ListItem<string>> = new Array<ListItem<string>>();
     private birthYears: Array<ListItem<number>> = new Array<ListItem<number>>();
     private genders: Array<ListItem<string>> = new Array<ListItem<string>>();
@@ -39,13 +40,13 @@ export default class Profile extends AuthComponent {
     public constructor() {
         super();
         
-        this.profileService = new ProfileService();
+        this.profileService = new AccountProfileService();
         this.listsService = new ListsService();
         this.categoriesService = new CategoriesService();
         this.notify = new Notify();
     }
     
-    public configure(profileService: IProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
+    public configure(profileService: IAccountProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
         this.profileService = profileService;
         this.listsService = listsService;
         this.categoriesService = categoriesService;
@@ -229,7 +230,7 @@ export default class Profile extends AuthComponent {
     private async loadProfile(): Promise<void> {
         try {
             // Get the profile stored before an auth refresh or create a new one
-            let profile: UserProfile = <UserProfile>store.get("profile");
+            let profile: AccountProfile = <AccountProfile>store.get("profile");
 
             if (profile) {
                 this.notify.showInformation("Your authentication session had expired.<br />Please try saving your profile again.");
@@ -241,7 +242,7 @@ export default class Profile extends AuthComponent {
             }
 
             // Use a copy constructor to ensure that the type has all fields initialised
-            this.model = new UserProfile(profile);
+            this.model = new AccountProfile(profile);
 
             // Populate first name, last name and email from data store if the values are not found
             if (!this.model.email) {

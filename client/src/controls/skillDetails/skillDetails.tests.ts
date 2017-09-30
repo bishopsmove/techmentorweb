@@ -1,5 +1,5 @@
 import SkillDetails from "./skillDetails";
-import { Skill } from "../../services/api/profileService";
+import { Skill } from "../../services/api/skill";
 
 describe("SkillDetails", () => {
     let sut: SkillDetails;

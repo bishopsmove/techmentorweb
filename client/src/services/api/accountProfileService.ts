@@ -1,35 +1,5 @@
 import { IHttp, Http } from "../http";
-
-export class SkillLevel {
-    public static Hobbyist = "hobbyist";
-    public static Beginner = "beginner";
-    public static Intermediate = "intermediate";
-    public static Expert = "expert";
-    public static Master = "master";
-};
-
-export class Skill {
-    level: string;
-    name: string;
-    yearLastUsed: number | null;
-    yearStarted: number | null;
-
-    public constructor(skill?: Skill) {
-        if (skill) {
-            // This is a copy constructor
-            this.level = skill.level;
-            this.name = skill.name;
-            this.yearLastUsed = skill.yearLastUsed;
-            this.yearStarted = skill.yearStarted;
-        } else {
-            // Add default values so that properties exist for binding in the UI
-            this.level = <string><any>null;
-            this.name = <string><any>null;
-            this.yearLastUsed = null;
-            this.yearStarted = null;
-        }
-    }
-};
+import { Skill } from "./skill";
 
 export class ProfileStatus
 {
@@ -38,7 +8,7 @@ export class ProfileStatus
     public static Available: string = "available";
 };
 
-export class UserProfile {    
+export class AccountProfile {    
     public bannedAt: Date | null;
     public id: string;
     public about: string | null;
@@ -56,7 +26,7 @@ export class UserProfile {
     public website: string | null;
     public yearStartedInTech: number | null;
 
-    public constructor(profile: UserProfile | null = null) {
+    public constructor(profile: AccountProfile | null = null) {
         if (profile) {
             // This is a copy constructor
             this.bannedAt = profile.bannedAt;
@@ -96,24 +66,24 @@ export class UserProfile {
     }
 };
 
-export interface IProfileService {
-    getAccountProfile(): Promise<UserProfile>;
-    updateAccountProfile(profile: UserProfile): Promise<void>;
+export interface IAccountProfileService {
+    getAccountProfile(): Promise<AccountProfile>;
+    updateAccountProfile(profile: AccountProfile): Promise<void>;
 }
 
-export class ProfileService implements IProfileService {
+export class AccountProfileService implements IAccountProfileService {
     public constructor(private http: IHttp = new Http()) {
     }
 
-    public getAccountProfile(): Promise<UserProfile> {
+    public getAccountProfile(): Promise<AccountProfile> {
         let uri: string = "profile/";
 
-        return this.http.get<UserProfile>(uri);
+        return this.http.get<AccountProfile>(uri);
     }
 
-    public updateAccountProfile(profile: UserProfile): Promise<void> {
+    public updateAccountProfile(profile: AccountProfile): Promise<void> {
         let uri: string = "profile/";
 
-        return this.http.put<UserProfile, void>(uri, profile);
+        return this.http.put<AccountProfile, void>(uri, profile);
     }
 };

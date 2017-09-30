@@ -1,6 +1,6 @@
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
-import { Skill } from "../../services/api/profileService";
+import { Skill } from "../../services/api/skill";
 
 @Component
 export default class SkillDetails extends Vue {
