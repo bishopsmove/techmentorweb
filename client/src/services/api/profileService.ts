@@ -21,6 +21,12 @@ export class Skill {
             this.name = skill.name;
             this.yearLastUsed = skill.yearLastUsed;
             this.yearStarted = skill.yearStarted;
+        } else {
+            // Add default values so that properties exist for binding in the UI
+            this.level = <string><any>null;
+            this.name = <string><any>null;
+            this.yearLastUsed = null;
+            this.yearStarted = null;
         }
     }
 };

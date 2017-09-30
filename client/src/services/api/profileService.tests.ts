@@ -17,11 +17,35 @@ describe("Skill", () => {
     });
 
     describe("constructor", () => {
-        it("copies values from source profile", () => {
+        it("copies values from source provided", () => {
             let actual = new Skill(source);
             let comparer = new Comparer();
 
             expect(comparer.IsEquivalent(source, actual)).toBeTruthy();
+        });
+        it("initializes with null values when no source provided", () => {
+            let actual = new Skill();
+            
+            expect(actual.level).toBeNull();
+            expect(actual.name).toBeNull();
+            expect(actual.yearLastUsed).toBeNull();
+            expect(actual.yearStarted).toBeNull();
+        });
+        it("initializes with null source", () => {
+            let actual = new Skill(<Skill><any>null);
+            
+            expect(actual.level).toBeNull();
+            expect(actual.name).toBeNull();
+            expect(actual.yearLastUsed).toBeNull();
+            expect(actual.yearStarted).toBeNull();
+        });
+        it("initializes with undefined source", () => {
+            let actual = new Skill(<Skill><any>undefined);
+            
+            expect(actual.level).toBeNull();
+            expect(actual.name).toBeNull();
+            expect(actual.yearLastUsed).toBeNull();
+            expect(actual.yearStarted).toBeNull();
         });
     });
 });

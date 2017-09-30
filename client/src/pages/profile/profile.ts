@@ -101,14 +101,6 @@ export default class Profile extends AuthComponent {
         this.isSkillAdd = true;
         this.skillModel = new Skill();
 
-        // Add default values when missing to fields that should be bound to lists that provide an unspecified value
-        // The reason for this is that the model from the API will have these fields missing from the JSON
-        // but we want the select lists to default to the Unspecified value. We need to trigger this binding
-        // by pushing a value onto the properties that match the Unspecified value in the select.
-        this.skillModel.level = <string><any>null;
-        this.skillModel.yearLastUsed = <number><any>null;
-        this.skillModel.yearStarted = <number><any>null;
-        
         // Ensure any previous validation triggers have been removed
         this.$validator.reset();
 
