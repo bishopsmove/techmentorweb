@@ -8,7 +8,7 @@
     </div>
     <v-container v-if="!loadingLists">
         <v-layout row wrap>
-            <v-flex xs12 sm4>
+            <v-flex xs12 md4>
                 <v-select
                     v-if="skills.length > 0"
                     name="skills"
@@ -22,7 +22,7 @@
                     v-model="selectedSkills">
                 </v-select>
             </v-flex>
-            <v-flex xs12 sm4>
+            <v-flex xs12 md4>
                 <v-select
                 v-if="languages.length > 0"
                     name="languages"
@@ -36,7 +36,7 @@
                     v-model="selectedLanguages">
                 </v-select>
             </v-flex>
-            <v-flex xs12 sm4>
+            <v-flex xs12 md4>
                 <v-select
                     v-if="genders.length > 0"
                     name="genders"
@@ -71,7 +71,7 @@
             </v-flex>
             <v-container fluid grid-list-md>
                 <v-layout row wrap>
-                    <v-flex v-for="profile in profiles" :key="profile.id" xs3 v-if="profiles.length > 0">
+                    <v-flex v-for="profile in profiles" :key="profile.id" xs12 sm6 md4 lg3 v-if="profiles.length > 0">
                         <ProfilePreview :profile="profile"></ProfilePreview>
                     </v-flex>
                 </v-layout>

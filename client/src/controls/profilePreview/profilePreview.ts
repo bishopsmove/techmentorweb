@@ -8,7 +8,22 @@ export default class ProfilePreview extends Vue {
     @Prop()
     profile: ProfileResult
     
-    public get DisplayGender() : string {
+    public get Age() : string {
+        if (!this.profile) {
+            return "";
+        }
+
+        if (!this.profile.birthYear) {
+            return "";
+        }
+
+        let currentYear = new Date().getFullYear();
+        let value = currentYear - this.profile.birthYear;
+
+        return value.toLocaleString();
+    }
+
+    public get Gender() : string {
         if (!this.profile) {
             return "";
         }
@@ -16,12 +31,31 @@ export default class ProfilePreview extends Vue {
         return this.ToProperCase(this.profile.gender);
     }
 
-    public get DisplayStatus() : string {
+    public get Status() : string {
         if (!this.profile) {
             return "";
         }
 
         return this.ToProperCase(this.profile.status);
+    }
+
+    public get YearsInTech() : string {
+        if (!this.profile) {
+            return "";
+        }
+
+        if (!this.profile.yearStartedInTech) {
+            return "";
+        }
+
+        let currentYear = new Date().getFullYear();
+        let value = currentYear - this.profile.yearStartedInTech;
+
+        if (value < 1) {
+            value = 1;
+        }
+
+        return value.toLocaleString();
     }
 
     private ToProperCase(value: string | null) : string {

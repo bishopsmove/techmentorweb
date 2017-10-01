@@ -5,16 +5,16 @@
     <v-container>
         <v-layout row wrap>
             <v-flex xs12 v-if="profile.gender">
-                Gender: {{ DisplayGender() }}
+                Gender: {{ Gender }}
             </v-flex>
             <v-flex xs12 v-if="profile.birthYear">
-                Age: {{ new Date().getFullYear() - profile.birthYear }}
+                Age: {{ Age }}
             </v-flex>
             <v-flex xs12 v-if="profile.yearStartedInTech">
                 Years in Tech: {{ new Date().getFullYear() - profile.yearStartedInTech }}
             </v-flex>
             <v-flex xs12 v-if="profile.status">
-                Status: {{ DisplayStatus() }}
+                Status: {{ Status }}
             </v-flex>
             <v-flex xs12 v-if="profile.timezone">
                 Time zone: {{ profile.timezone }}
@@ -23,6 +23,6 @@
     </v-container>
     <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat>View</v-btn>
+        <v-btn :to="{ name: 'profile' }" title="View Profile" flat>View</v-btn>
     </v-card-actions>
 </v-card>
