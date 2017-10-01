@@ -4,8 +4,13 @@ import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
 import { ICategoriesService, CategoriesService, Category, CategoryGroup } from "../../services/api/categoriesService";
 import { IProfileService, ProfileService, CategoryFilter, ProfileResult } from "../../services/api/profileService";
+import ProfilePreview from "../../controls/profilePreview/profilePreview";
 
-@Component
+@Component({
+    components: {
+        ProfilePreview
+    }
+  })
 export default class Home extends Vue {
     private categoriesService: ICategoriesService;
     private profileService: IProfileService;
@@ -132,33 +137,9 @@ export default class Home extends Vue {
     private async loadCategories(): Promise<Array<Category>> {
         let categories = await this.categoriesService.getCategories();
 
-        // Filter out categories without links and then sort by case insensitive group, then name
+        // Filter out categories without links
         let availableCategories = categories.filter((item: Category) => {
             return item.linkCount > 0;
-        }).sort((a: Category, b: Category) => {
-            let firstGroup = a.group.toLocaleLowerCase();
-            let secondGroup = b.group.toLocaleLowerCase();
-
-            if (firstGroup < secondGroup) {
-                return -1;
-            }
-            
-            if (firstGroup > secondGroup) {
-                return 1;
-            }
-            
-            let firstName = a.name.toLocaleLowerCase();
-            let secondName = b.name.toLocaleLowerCase();
-
-            if (firstName < secondName) {
-                return -1;
-            }
-
-            if (firstName > secondName) {
-                return 1;
-            }
-
-            return 0;
         });
 
         return availableCategories;

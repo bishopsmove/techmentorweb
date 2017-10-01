@@ -62,7 +62,6 @@ describe("AdminCategoriesService", () => {
                 reviewed: true,
                 visible: false
             });
-            
 
         http = <IHttp>{
             get: async (resource: string): Promise<Array<AdminCategory>> => {

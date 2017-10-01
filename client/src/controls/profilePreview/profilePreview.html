@@ -1,0 +1,28 @@
+<v-card>
+    <v-card-title primary-title class="indigo darken-2">
+        <div class="headline white--text">{{ profile.firstName }} {{ profile.lastName }}</div>
+    </v-card-title>
+    <v-container>
+        <v-layout row wrap>
+            <v-flex xs12 v-if="profile.gender">
+                Gender: {{ DisplayGender() }}
+            </v-flex>
+            <v-flex xs12 v-if="profile.birthYear">
+                Age: {{ new Date().getFullYear() - profile.birthYear }}
+            </v-flex>
+            <v-flex xs12 v-if="profile.yearStartedInTech">
+                Years in Tech: {{ new Date().getFullYear() - profile.yearStartedInTech }}
+            </v-flex>
+            <v-flex xs12 v-if="profile.status">
+                Status: {{ DisplayStatus() }}
+            </v-flex>
+            <v-flex xs12 v-if="profile.timezone">
+                Time zone: {{ profile.timezone }}
+            </v-flex>
+        </v-layout>
+    </v-container>
+    <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn flat>View</v-btn>
+    </v-card-actions>
+</v-card>
