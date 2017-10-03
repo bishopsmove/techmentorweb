@@ -1,7 +1,8 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
 import SkillDetails from "../../controls/skillDetails/skillDetails.vue";
-import { IProfileService, ProfileService, UserProfile, ProfileStatus, Skill } from "../../services/api/profileService";
+import { Skill } from "../../services/api/skill";
+import { IAccountProfileService, AccountProfileService, AccountProfile, ProfileStatus } from "../../services/api/accountProfileService";
 import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
 import { IListsService, ListsService, ListItem } from "../../services/lists";
@@ -15,7 +16,7 @@ import marked from "marked";
     }
   })
 export default class Profile extends AuthComponent {
-    private profileService: IProfileService;
+    private profileService: IAccountProfileService;
     private listsService: IListsService;
     private categoriesService: ICategoriesService
     private notify: INotify;
@@ -23,7 +24,7 @@ export default class Profile extends AuthComponent {
     // Properties for view binding
     private loading: boolean = true;
     private compiledMarkdown: string = "";
-    private model: UserProfile = new UserProfile();
+    private model: AccountProfile = new AccountProfile();
     private timezones: Array<ListItem<string>> = new Array<ListItem<string>>();
     private birthYears: Array<ListItem<number>> = new Array<ListItem<number>>();
     private genders: Array<ListItem<string>> = new Array<ListItem<string>>();
@@ -33,18 +34,19 @@ export default class Profile extends AuthComponent {
     private languages: Array<string> = new Array<string>();
     private skills: Array<string> = new Array<string>();
     private skillModel: Skill = new Skill();
+    private isSkillAdd: boolean = false;
     private showDialog: boolean = false;
 
     public constructor() {
         super();
         
-        this.profileService = new ProfileService();
+        this.profileService = new AccountProfileService();
         this.listsService = new ListsService();
         this.categoriesService = new CategoriesService();
         this.notify = new Notify();
     }
     
-    public configure(profileService: IProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
+    public configure(profileService: IAccountProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
         this.profileService = profileService;
         this.listsService = listsService;
         this.categoriesService = categoriesService;
@@ -97,23 +99,38 @@ export default class Profile extends AuthComponent {
     }
 
     public OnAddSkill(): void {
+        this.isSkillAdd = true;
         this.skillModel = new Skill();
 
-        // Add default values when missing to fields that should be bound to lists that provide an unspecified value
-        // The reason for this is that the model from the API will have these fields missing from the JSON
-        // but we want the select lists to default to the Unspecified value. We need to trigger this binding
-        // by pushing a value onto the properties that match the Unspecified value in the select.
-        this.skillModel.level = <string><any>null;
-        this.skillModel.yearLastUsed = <number><any>null;
-        this.skillModel.yearStarted = <number><any>null;
-        
         // Ensure any previous validation triggers have been removed
         this.$validator.reset();
 
         this.showDialog = true;
     }
 
-    public async OnSaveSkill(): Promise<void> {        
+    public OnDeleteSkill(skill: Skill): void {
+        if (!this.model) {
+            return;
+        }
+
+        if (!this.model.skills) {
+            return;
+        }
+
+        this.model.skills = this.model.skills.filter(item => item.name !== skill.name);
+    }
+
+    public OnEditSkill(skill: Skill): void {
+        this.isSkillAdd = false;
+        this.skillModel = skill;
+
+        // Ensure any previous validation triggers have been removed
+        this.$validator.reset();
+        
+        this.showDialog = true;
+    }
+
+    public async OnSaveSkill(): Promise<void> {
         let isValid = await this.$validator.validateAll("skillForm");
 
         if (!isValid) {
@@ -123,7 +140,11 @@ export default class Profile extends AuthComponent {
         }
         
         this.model.skills = this.model.skills || new Array<Skill>();
-        this.model.skills.push(this.skillModel);
+
+        if (this.isSkillAdd) {
+            // This is an add of a skill
+            this.model.skills.push(this.skillModel);
+        }
 
         this.showDialog = false;
     }
@@ -209,18 +230,19 @@ export default class Profile extends AuthComponent {
     private async loadProfile(): Promise<void> {
         try {
             // Get the profile stored before an auth refresh or create a new one
-            let cachedProfile: UserProfile = <UserProfile>store.get("profile");
+            let profile: AccountProfile = <AccountProfile>store.get("profile");
 
-            if (cachedProfile) {
-                this.model = cachedProfile;
-                
+            if (profile) {
                 this.notify.showInformation("Your authentication session had expired.<br />Please try saving your profile again.");
     
                 store.remove("profile");
             }
             else {
-                this.model = await this.profileService.getAccountProfile();
+                profile = await this.profileService.getAccountProfile();
             }
+
+            // Use a copy constructor to ensure that the type has all fields initialised
+            this.model = new AccountProfile(profile);
 
             // Populate first name, last name and email from data store if the values are not found
             if (!this.model.email) {

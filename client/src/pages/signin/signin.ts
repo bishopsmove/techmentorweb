@@ -35,7 +35,7 @@ export default class SignIn extends AuthComponent {
         let redirectUri = this.getRedirectUri();
 
         if (!redirectUri) {
-            this.$router.replace({ name: "profile" });
+            this.$router.replace({ name: "accountProfile" });
 
             return;
         }

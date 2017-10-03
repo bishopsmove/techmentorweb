@@ -1,6 +1,6 @@
 import { Component, Prop } from "vue-property-decorator";
 import Vue from "vue";
-import { Skill } from "../../services/api/profileService";
+import { Skill } from "../../services/api/skill";
 
 @Component
 export default class SkillDetails extends Vue {
@@ -8,7 +8,7 @@ export default class SkillDetails extends Vue {
     @Prop()
     skill: Skill
     
-    public DisplayName(): string {
+    public get DisplayName(): string {
         if (!this.skill) {
             return "";
         }
@@ -20,7 +20,7 @@ export default class SkillDetails extends Vue {
         return this.skill.name;
     }
 
-    public DisplayLevel() : string {
+    public get DisplayLevel() : string {
         if (!this.skill) {
             return "";
         }
@@ -35,7 +35,7 @@ export default class SkillDetails extends Vue {
         return first + remainder;
     }
 
-    public DisplayYearRange(): string {
+    public get DisplayYearRange(): string {
         if (!this.skill) {
             return "";
         }
@@ -49,12 +49,32 @@ export default class SkillDetails extends Vue {
             return "";
         }
 
+        let endYear = new Date().getFullYear();
+
+        if (this.skill.yearLastUsed) {
+            endYear = <number>this.skill.yearLastUsed;
+        }
+
+        let totalYears = endYear - this.skill.yearStarted;
+
+        if (totalYears < 1) {
+            // Other than a bug where the start is after the end, this is likely to be that the years are the same
+            // It doesn't make sense to say the user has no experience, so we will use a year as a minimum
+            totalYears = 1;
+        }
+
+        let yearLabel = "years";
+
+        if (totalYears === 1) {
+            yearLabel = "year";
+        }
+
         // We have a year started
         if (this.skill.yearLastUsed) {
             // We have a value for both years
-            return "from " + this.skill.yearStarted + " to " + this.skill.yearLastUsed;
+            return "over " + totalYears + " " + yearLabel + " until " + this.skill.yearLastUsed;
         }
 
-        return "since " + this.skill.yearStarted
+        return "over " + totalYears + " " + yearLabel;
     }
 };

@@ -78,6 +78,7 @@
                         label="Birth Year"
                         title="Birth Year"
                         autocomplete
+                        browserAutocomplete="off"
                         item-text="name"
                         item-value="value"
                         v-bind:items="birthYears"
@@ -101,6 +102,7 @@
                         label="Time Zone"
                         title="Time Zone"
                         autocomplete
+                        browserAutocomplete="off"
                         item-text="name"
                         item-value="value"
                         v-bind:items="timezones"
@@ -146,6 +148,7 @@
                         label="Year Started In Tech"
                         title="Year Started In Tech"
                         autocomplete
+                        browserAutocomplete="off"
                         item-text="name"
                         item-value="value"
                         v-bind:items="techYears"
@@ -159,7 +162,7 @@
                         title="Website"
                         autocomplete="off"
                         v-model="model.website"    
-                        :error-messages="errors.collect('profileForm.website')"
+                        :error-messages="errors.collect('website')"
                         data-vv-scope="profileForm"                
                         v-validate="'url:true'"
                         :append-icon="model.website ? 'link' : ''"
@@ -197,9 +200,15 @@
         <h6>Skills</h6>
         <v-container grid-list-md text-xs-center>
             <v-layout row wrap>
-                <v-flex v-for="(skill, index) in model.skills" :key="skill.name" xs12 class="text-xs-left">
+                <v-flex v-for="skill in model.skills" :key="skill.name" xs12 class="text-xs-left">
                     <p>
-                        <SkillDetails :skill="model.skills[index]" />
+                        <SkillDetails :skill="skill" />
+                        <v-btn icon class="green--text" @click="OnEditSkill(skill)">
+                            <v-icon>edit</v-icon>
+                        </v-btn>
+                        <v-btn icon class="red--text" @click="OnDeleteSkill(skill)">
+                            <v-icon>delete</v-icon>
+                        </v-btn>
                     </p>
                 </v-flex>
                 <v-flex xs12 class="text-xs-left">
@@ -227,7 +236,7 @@
         <v-form data-vv-scope="skillForm">
             <v-card>
                 <v-card-title>
-                    <span class="headline">Skill</span>
+                    <span class="headline">{{ isSkillAdd ? "Add" : "Edit" }} Skill</span>
                 </v-card-title>
                 <v-card-text>
                     <v-container grid-list-md>
@@ -243,7 +252,14 @@
                                     v-model="skillModel.name"
                                     :error-messages="errors.collect('name')"
                                     data-vv-scope="skillForm"
-                                    v-validate="'required'">
+                                    v-validate="'required'"
+                                    v-if="isSkillAdd">
+                                </v-text-field>
+                                <v-text-field
+                                    label="Name"
+                                    v-model="skillModel.name"
+                                    :disabled="true"
+                                    v-if="!isSkillAdd">
                                 </v-text-field>
                             </v-flex>
                             <v-flex xs12 sm6>
@@ -266,6 +282,7 @@
                                     label="Year Started"
                                     title="Year Started"
                                     autocomplete
+                                    browserAutocomplete="off"
                                     item-text="name"
                                     item-value="value"
                                     v-bind:items="techYears"
@@ -278,6 +295,7 @@
                                     label="Year Last Used"
                                     title="Year Last Used"
                                     autocomplete
+                                    browserAutocomplete="off"
                                     item-text="name"
                                     item-value="value"
                                     v-bind:items="techYears"
@@ -290,8 +308,9 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn class="blue--text darken-1" flat @click="showDialog = false">Close</v-btn>
-                    <v-btn class="blue--text darken-1" flat @click="OnSaveSkill">Save</v-btn>
+                    <v-btn class="blue--text darken-1" flat @click="showDialog = false" v-if="isSkillAdd">Close</v-btn>
+                    <v-btn class="blue--text darken-1" flat @click="OnSaveSkill" v-if="isSkillAdd">Save</v-btn>
+                    <v-btn class="blue--text darken-1" flat @click="OnSaveSkill" v-if="!isSkillAdd">OK</v-btn>
                 </v-card-actions>
             </v-card>
         </v-form>

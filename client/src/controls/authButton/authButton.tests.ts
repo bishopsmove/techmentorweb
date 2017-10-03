@@ -14,7 +14,7 @@ describe("authButton.ts", () => {
         sut = new AuthButton();
         
         href = "https://www.test.com/stuff?where=here";
-        signInTarget = "profile";
+        signInTarget = "accountProfile";
         signInTargetUri = "/profile";
 
         store = {

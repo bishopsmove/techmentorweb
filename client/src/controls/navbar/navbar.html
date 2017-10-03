@@ -5,7 +5,7 @@
         <v-btn :to="{ name: 'home' }" title="Home" flat exact>
             Home
         </v-btn>
-        <v-btn :to="{ name: 'profile' }" v-if="isAuthenticated()" title="Profile" flat>Profile</v-btn>
+        <v-btn :to="{ name: 'accountProfile' }" v-if="isAuthenticated()" title="Profile" flat>Profile</v-btn>
         <v-btn :to="{ name: 'admin' }" v-if="isAdministrator()" title="Admin" flat>Admin</v-btn>
         <AuthButton></AuthButton>
     </v-toolbar-items>

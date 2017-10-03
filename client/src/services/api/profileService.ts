@@ -1,68 +1,50 @@
 import { IHttp, Http } from "../http";
+import { Skill } from "./skill";
 
-export class SkillLevel {
-    public static Hobbyist = "hobbyist";
-    public static Beginner = "beginner";
-    public static Intermediate = "intermediate";
-    public static Expert = "expert";
-    public static Master = "master";
+export class CategoryFilter {
+    group: string;
+    name: string;
 };
 
-export class Skill {
-        level: string;
-        name: string;
-        yearLastUsed?: number | null;
-        yearStarted?: number | null;
-};
-
-export class ProfileStatus
-{
-    public static Hidden: string = "hidden";
-    public static Unavailable: string = "unavailable";
-    public static Available: string = "available";
-};
-
-export class UserProfile {
-    public bannedAt?: Date;
+export class ProfileResult {    
     public id: string;
-    public about?: string;
-    public birthYear?: number;
-    public email: string;
+    public birthYear: number | null;
     public firstName: string;
-    public gender?: string;
-    public gitHubUsername?: string;
-    public languages?: Array<string>;
+    public gender: string | null;
     public lastName: string;
-    public timeZone?: string;
-    public skills?: Array<Skill>;
     public status: string;
-    public twitterUsername?: string;
-    public website?: string;
-    public yearStartedInTech?: number;
+    public timeZone: string | null;
+    public yearStartedInTech: number | null;
+};
 
-    public constructor() {
-        this.status = ProfileStatus.Hidden;
-    }    
+export class Profile extends ProfileResult {    
+    public about: string | null;
+    public gitHubUsername: string | null;
+    public languages: Array<string>;
+    public skills: Array<Skill>;
+    public twitterUsername: string | null;
+    public website: string | null;
 };
 
 export interface IProfileService {
-    getAccountProfile(): Promise<UserProfile>;
-    updateAccountProfile(profile: UserProfile): Promise<void>;
-}
+    searchProfiles(filters: Array<CategoryFilter>): Promise<Array<ProfileResult>>;
+};
 
 export class ProfileService implements IProfileService {
     public constructor(private http: IHttp = new Http()) {
+
     }
 
-    public getAccountProfile(): Promise<UserProfile> {
-        let uri: string = "profile/";
+    public async searchProfiles(filters: Array<CategoryFilter>): Promise<Array<ProfileResult>> {
+        let uri: string = "profiles/?";
 
-        return this.http.get<UserProfile>(uri);
+        filters.forEach(element => {
+            uri+= encodeURIComponent(element.group) + "=" + encodeURIComponent(element.name) + "&";
+        });
+
+        // Remove the trailing &
+        uri = uri.substr(0, uri.length - 1);
+
+        return await this.http.get<Array<ProfileResult>>(uri);
     }
-
-    public updateAccountProfile(profile: UserProfile): Promise<void> {
-        let uri: string = "profile/";
-
-        return this.http.put<UserProfile, void>(uri, profile);
-    }
-};
+}
