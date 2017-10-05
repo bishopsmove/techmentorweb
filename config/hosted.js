@@ -5,14 +5,15 @@ module.exports = {
     selfHost: false,
 
     // Common configuration
-    environment: "#{Environment.Name}",
-    version: "#{Release.Number}",
-    apiUri: "#{Api.Uri}",
+    environment: "#{RELEASE_ENVIRONMENTNAME}",
+    version: "#{BUILD_BUILDNUMBER}",
+    apiUri: "#{API_URI}",
 
     // Client configuration
-    authAudience: "#{Api.Uri}",
-    authClientId: "#{Auth.ClientId}",
+    authAudience: "#{API_URI}",
+    authClientId: "#{AUTH_CLIENTID}",
     
     // Server configuration
-    port: 443,
+    // NOTE: Port needs to be the string representation here so that the string value is written to the bundle rather than the bundle time value in node
+    port: "process.env.PORT",
 };

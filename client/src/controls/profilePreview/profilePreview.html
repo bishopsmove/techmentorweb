@@ -1,8 +1,8 @@
 <v-card>
-    <v-card-title primary-title class="indigo darken-2">
+    <v-card-title primary-title class="blue darken-4">
         <div class="headline white--text">{{ profile.firstName }} {{ profile.lastName }}</div>
     </v-card-title>
-    <v-container>
+    <v-card-text>
         <v-layout row wrap>
             <v-flex xs12 v-if="profile.gender">
                 Gender: {{ Gender }}
@@ -11,7 +11,7 @@
                 Age: {{ Age }}
             </v-flex>
             <v-flex xs12 v-if="profile.yearStartedInTech">
-                Years in Tech: {{ new Date().getFullYear() - profile.yearStartedInTech }}
+                Years in Tech: {{ YearsInTech }}
             </v-flex>
             <v-flex xs12 v-if="profile.status">
                 Status: {{ Status }}
@@ -20,7 +20,7 @@
                 Time zone: {{ profile.timeZone }}
             </v-flex>
         </v-layout>
-    </v-container>
+    </v-card-text>
     <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn :to="{ name: 'profile' }" title="View Profile" flat>View</v-btn>
