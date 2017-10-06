@@ -2,7 +2,7 @@ import homeComponent from "../../pages/home/home.vue";
 import conductComponent from "../../pages/conduct/conduct.vue";
 import accountProfileComponent from "../../pages/accountProfile/accountProfile.vue";
 import notFoundComponent from "../../pages/notfound/notfound.vue";
-import signInComponent from "../../pages/signin/signin.vue";
+// import signInComponent from "../../pages/signin/signin.vue";
 import unauthorizedComponent from "../../pages/unauthorized/unauthorized.vue";
 import adminComponent from "../../pages/admin/admin.vue";
 import categoriesComponent from "../../pages/categories/categories.vue";
@@ -11,10 +11,12 @@ import categoriesComponent from "../../pages/categories/categories.vue";
 // let conductComponent;
 // let accountProfileComponent;
 // let notFoundComponent;
-// let signInComponent;
+let signInComponent;
 // let categoriesComponent;
 
-// if (webpackDefine.configuration === "debug") {
+signInComponent = () => import("../../pages/signin/signin.vue");
+
+    // if (webpackDefine.configuration === "debug") {
     // homeComponent = require("../../pages/home/home.vue");
     // conductComponent = require("../../pages/conduct/conduct.vue");
     // accountProfileComponent = require("../../pages/accountProfile/accountProfile.vue");

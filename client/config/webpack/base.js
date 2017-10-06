@@ -9,7 +9,7 @@ const rootPath = path.join(__dirname, "../../../");
 const sourcePath = path.join(__dirname, "../../src");
 
 const extractSass = new ExtractTextPlugin({
-    filename: "content/[name].css",
+    filename: "content/[name].css?hash=[contenthash]",
 });
 
 let plugins = [

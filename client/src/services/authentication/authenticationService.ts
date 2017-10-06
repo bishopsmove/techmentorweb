@@ -46,12 +46,15 @@ export class AuthenticationService implements IAuthenticationService {
     public Authenticate(returnUri: string): void {        
         let callbackUri = this.location.getSignInUri(returnUri);
 
-        this.auth0.authorize({
+        let uri = this.auth0.buildAuthorizeUrl({
                 audience: this.config.audience,
                 redirectUri: callbackUri,
                 responseType: this.config.responseType,
                 scope: this.config.scope
-            });            
+            });
+            
+        // TODO: Return the uri so that the caller can replace the current location in history with this uri
+        this.location.setHref(uri);
     }
         
     public async ProcessAuthResponse(): Promise<SignInResponse> {
