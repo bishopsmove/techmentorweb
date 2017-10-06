@@ -24,12 +24,10 @@ module.exports = function() {
         compilerConfiguration = webpackClientConfig;
 
         webpackClientConfig.entry.app.unshift("webpack/hot/dev-server");
-        webpackClientConfig.entry.vendor.unshift("webpack/hot/dev-server");
 
         let hotReloadClientConfig = "webpack-hot-middleware/client?http://localhost:" + config.port;
 
         webpackClientConfig.entry.app.unshift(hotReloadClientConfig);
-        webpackClientConfig.entry.vendor.unshift(hotReloadClientConfig);
 
         webpackClientConfig.plugins.push(new webpack.HotModuleReplacementPlugin());
     }

@@ -3,13 +3,25 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const VendorChunkPlugin = require("webpack-vendor-chunk-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const WebpackMd5Hash = require('webpack-md5-hash');
+const ScriptExtHtmlWebpackPlugin = require("script-ext-html-webpack-plugin");
 const config = require("../../../config");
 
 const rootPath = path.join(__dirname, "../../../");
 const sourcePath = path.join(__dirname, "../../src");
 
+const createFilePath = (directoryName, fileExtension) => {    
+    let path = directoryName + "/[name]." + fileExtension;
+    
+    if (!config.selfHost) {
+        path += "?hash=[chunkhash]";
+    }
+
+    return path;
+}
+
 const extractSass = new ExtractTextPlugin({
-    filename: "content/[name].css",
+    filename: createFilePath("content", "css")
 });
 
 let plugins = [
@@ -28,19 +40,49 @@ let plugins = [
             "sentryUri": JSON.stringify(config.clientSentryUri)
         } 
     }),
+
+    // Extract all 3rd party modules into a separate 'vendor' chunk
     new webpack.optimize.CommonsChunkPlugin({
-        name: "vendor",
-        filename: "scripts/vendor.js"
+        name: "vendor", 
+        minChunks: ({ resource }) => /node_modules/.test(resource)
     }),
+    
+    // Generate a 'manifest' chunk to be inlined in the HTML template
+    new webpack.optimize.CommonsChunkPlugin('manifest'),
+
+    // Need this plugin for deterministic hashing
+    // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
+    // for more info: https://webpack.js.org/how-to/cache/
+    new WebpackMd5Hash(),
+
     new HtmlWebpackPlugin({
-        hash: true,
+        hash: false,
         filename: "index.html",
         template: path.join(sourcePath, "/index.html"),
     }),
+    // new ScriptExtHtmlWebpackPlugin({
+    //     defaultAttribute: "defer"
+    //   }),
     extractSass
 ];
 
 if (config.configuration === "release") {
+    const namedModules = new webpack.NamedModulesPlugin();
+    const namedChunks = new webpack.NamedChunksPlugin((chunk) => {
+        if (chunk.name) {
+            return chunk.name;
+        }
+
+        let n = [];
+        
+        chunk.forEachModule(m => n.push(path.relative(m.context, m.request)))
+        
+        return n.join("_");
+    });
+
+    plugins.unshift(namedChunks);   // This will end up in index 1 after the next line
+    plugins.unshift(namedModules);  // This will be the first entry
+
     let uglify = new webpack.optimize.UglifyJsPlugin({
         compress: {
             warnings: false
@@ -54,17 +96,13 @@ module.exports = {
     name: "client",
     target: "web",
     entry: {
-        app: [path.join(sourcePath, "/index.ts")],
-
-        // auth0-js is included back in the vendor bundle until lazy loaded modules are working
-        // When lazy modules are available then this can come out of the vendor bundle and be pulled into the app.auth bundle by nature of the import
-        vendor: ["auth0-js", "vue", "vuex", "vue-router", "vuex-persistedstate", "vee-validate", "vuetify", "store", "iziToast", "axios", "es6-promise/auto", "vue-class-component", "tz-ids/index.jsnext.js", "marked"]
+        app: [path.join(sourcePath, "/index.ts")]
     },
     output: {
-        chunkFilename: 'scripts/[name].js',
         path: path.join(rootPath, "/dist"),
         publicPath: "/",
-        filename: "scripts/[name].js"
+        filename: createFilePath("scripts", "js"),
+        chunkFilename: createFilePath("scripts", "js")
     },
     devtool: "source-map",
     resolve: {
