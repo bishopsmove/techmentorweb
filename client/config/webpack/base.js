@@ -25,7 +25,7 @@ let plugins = [
             "clientId": JSON.stringify(config.authClientId),
             "responseType": JSON.stringify(config.authResponseType),
             "scope": JSON.stringify(config.authScope),
-            "sentryUri": JSON.stringify(config.clientSentryUri)
+            "applicationInsightsKey": JSON.stringify(config.clientApplicationInsightsKey)
         } 
     }),
     new webpack.optimize.CommonsChunkPlugin({
@@ -58,7 +58,23 @@ module.exports = {
 
         // auth0-js is included back in the vendor bundle until lazy loaded modules are working
         // When lazy modules are available then this can come out of the vendor bundle and be pulled into the app.auth bundle by nature of the import
-        vendor: ["auth0-js", "vue", "vuex", "vue-router", "vuex-persistedstate", "vee-validate", "vuetify", "store", "iziToast", "axios", "es6-promise/auto", "vue-class-component", "tz-ids/index.jsnext.js", "marked"]
+        vendor: [
+            "auth0-js", 
+            "vue", 
+            "vuex", 
+            "vue-router", 
+            "vuex-persistedstate", 
+            "vee-validate", 
+            "vuetify", 
+            "vue-application-insights",
+            "store", 
+            "iziToast", 
+            "axios", 
+            "es6-promise/auto", 
+            "vue-class-component", 
+            "tz-ids/index.jsnext.js", 
+            "marked"
+        ]
     },
     output: {
         chunkFilename: 'scripts/[name].js',
