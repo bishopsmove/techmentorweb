@@ -45,14 +45,14 @@ export class Http implements IHttp {
                 return Promise.resolve(error);
             }
 
-            if (userService.isAuthenticated === false) {
+            if (userService.IsAuthenticated === false) {
                 // The user is not authenticated and has been able to issue a request to a secure resource
 
                 // TODO: This really should redirect to the unauthorized page
                 return Promise.resolve(error);
             }
 
-            if (userService.sessionExpired === false) {
+            if (userService.SessionExpired === false) {
                 // The user is authenticated has still has a valid session
                 // They have invoked something they are not allowed to hit
                 
@@ -60,7 +60,7 @@ export class Http implements IHttp {
                 return Promise.resolve(error);
             }
 
-            const failure = new Failure("Your authentication session has expired.")
+            const failure = new Failure("Your authentication session has expired.");
 
             // We will redirect the user to authenticate again because their session has expired
             let returnUri = location.getHref();
