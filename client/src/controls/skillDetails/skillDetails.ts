@@ -6,7 +6,7 @@ import { Skill } from "../../services/api/skill";
 export default class SkillDetails extends Vue {
     
     @Prop()
-    skill: Skill
+    skill: Skill;
     
     public get DisplayName(): string {
         if (!this.skill) {
@@ -20,7 +20,7 @@ export default class SkillDetails extends Vue {
         return this.skill.name;
     }
 
-    public get DisplayLevel() : string {
+    public get DisplayLevel(): string {
         if (!this.skill) {
             return "";
         }
@@ -77,4 +77,4 @@ export default class SkillDetails extends Vue {
 
         return "over " + totalYears + " " + yearLabel;
     }
-};
+}

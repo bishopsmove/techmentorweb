@@ -1,10 +1,12 @@
-import Component from "vue-class-component";
+import { Component, Watch } from "vue-property-decorator";
 import AuthComponent from "../../components/authComponent";
 import { IAuthenticationService, AuthenticationService } from "../../services/authentication/authenticationService";
+import Failure from "../../services/failure";
 
 @Component
 export default class SignIn extends AuthComponent {
     private authenticationService: IAuthenticationService;
+    private model: Failure | null = null;
 
     public constructor() {
         super();
@@ -21,14 +23,29 @@ export default class SignIn extends AuthComponent {
         return this.OnLoad();
     }
 
+    @Watch("$route")
+    public OnRouteChanged(): void {
+        this.OnLoad();
+    }
+
     public async OnLoad(): Promise<void> {
-        let authenticated = await this.Authenticate();
-
-        if (!authenticated) {
-            return;
+        try {
+            let authenticated = await this.Authenticate();
+    
+            if (!authenticated) {
+                return;
+            }
+    
+            this.redirect();   
         }
-
-        this.redirect();        
+        catch (failure) {
+            // Check Failure.visibleToUser
+            if (failure.visibleToUser) {
+                this.model = <Failure>failure;
+            } else {
+                throw failure;
+            }
+        }     
     }
 
     private redirect(): void {
@@ -47,8 +64,8 @@ export default class SignIn extends AuthComponent {
     }
 
     public async Authenticate(): Promise<Boolean> {
-        if (this.isAuthenticated()
-            && !this.sessionExpired()) {
+        if (this.IsAuthenticated
+            && !this.SessionExpired) {
             // The user already has an auth session
             return true;
         }
@@ -64,7 +81,7 @@ export default class SignIn extends AuthComponent {
             this.$store.commit("isAdministrator", response.isAdministrator);
             this.$store.commit("lastName", response.lastName);
             this.$store.commit("tokenExpires", response.tokenExpires);
-
+            
             return true;
         }
         else {
@@ -76,7 +93,7 @@ export default class SignIn extends AuthComponent {
             // We are redirecting to authenticate
             return false;
         }
-    };
+    }
 
     private getRedirectUri (): string {
         let uri = this.$route.query.redirectUri;
@@ -97,4 +114,4 @@ export default class SignIn extends AuthComponent {
 
         return targetRoute.href;
     }
-};
+}
