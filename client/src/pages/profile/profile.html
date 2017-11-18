@@ -1,6 +1,6 @@
 <div>    
     <div v-if="loading" class="text-xs-center">
-        <v-progress-circular indeterminate v-bind:size="75" class="primary--text"></v-progress-circular>
+        <v-progress-circular indeterminate v-bind:size="75" indeterminate color="primary"></v-progress-circular>
         <p class="ma-3 subheading">Loading the profile, please wait...</p>
     </div>  
     <v-card v-if="!loading">
@@ -70,7 +70,7 @@
                     <div class="mb-2 subheading">
                         About
                     </div>
-                    <div v-html="compiledMarkdown" class="mb-2"></div>
+                    <div v-html="compiledMarkdown" class="mb-2 markdown"></div>
                 </v-flex>
             </v-layout>
         </v-card-text>

@@ -30,12 +30,12 @@ export default class Profile extends AuthComponent {
     public loading: boolean = true;
     public compiledMarkdown: string = "";
     public model: AccountProfile = new AccountProfile();
-    public timezones: Array<ListItem<string>> = new Array<ListItem<string>>();
-    public birthYears: Array<ListItem<number>> = new Array<ListItem<number>>();
-    public genders: Array<ListItem<string>> = new Array<ListItem<string>>();
+    public timezones: Array<string> = new Array<string>();
+    public birthYears: Array<number> = new Array<number>();
     public statuses: Array<ListItem<string>> = new Array<ListItem<string>>();
-    public techYears: Array<ListItem<number>> = new Array<ListItem<number>>();
+    public techYears: Array<number> = new Array<number>();
     public skillLevels: Array<ListItem<string>> = new Array<ListItem<string>>();
+    public genders: Array<string> = new Array<string>();
     public languages: Array<string> = new Array<string>();
     public skills: Array<string> = new Array<string>();
     public skillModel: Skill = new Skill();
@@ -346,7 +346,6 @@ export default class Profile extends AuthComponent {
         this.birthYears = this.listsService.getBirthYears();
         this.techYears = this.listsService.getTechYears();
         this.statuses = this.listsService.getProfileStatuses();
-        this.genders = this.listsService.getGenders();
         this.skillLevels = this.listsService.getSkillLevels();
 
         let categories = await this.categoriesService.getCategories();
@@ -361,6 +360,13 @@ export default class Profile extends AuthComponent {
         this.skills = categories
             .filter((item: Category) => {
                 return item.group === CategoryGroup.Skill;
+            }).map((item: Category) => {
+                return item.name;
+            });
+            
+        this.genders = categories
+            .filter((item: Category) => {
+                return item.group === CategoryGroup.Gender;
             }).map((item: Category) => {
                 return item.name;
             });
@@ -398,38 +404,6 @@ export default class Profile extends AuthComponent {
                 this.model.lastName = this.$store.getters["lastName"];
             }
 
-            // Add default values when missing to fields that should be bound to lists that provide an unspecified value
-            // The reason for this is that the model from the API will have these fields missing from the JSON
-            // but we want the select lists to default to the Unspecified value. We need to trigger this binding
-            // by pushing a value onto the properties that match the Unspecified value in the select.
-            if (!this.model.gender) {
-                this.model.gender = <string><any>null;
-            }
-
-            if (!this.model.birthYear) {
-                this.model.birthYear = <number><any>null;
-            }
-
-            if (!this.model.yearStartedInTech) {
-                this.model.yearStartedInTech = <number><any>null;
-            }
-
-            if (!this.model.timeZone) {
-                this.model.timeZone = <string><any>null;
-            }
-            
-            if (!this.model.website) {
-                this.model.website = <string><any>null;
-            }
-            
-            if (!this.model.gitHubUsername) {
-                this.model.gitHubUsername = <string><any>null;
-            }
-            
-            if (!this.model.twitterUsername) {
-                this.model.twitterUsername = <string><any>null;
-            }
-            
             this.CompileMarkdown();
         }
         catch (failure) {
