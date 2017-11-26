@@ -1,6 +1,7 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
-import SkillDetails from "../../controls/skillDetails/skillDetails.vue";
+import SkillDetails from "../../controls/skillDetails/skillDetails";
+import SkillDialog from "../../components/skillDialog/skillDialog.vue";
 import FileUpload from "vue-upload-component";
 import { IPhotoConfig, PhotoConfig } from "../../services/config/photoConfig";
 import { Skill } from "../../services/api/skill";
@@ -17,7 +18,8 @@ const noPhotoModule = require("../../images/no_photo.svg");
 @Component({
     components: {
       SkillDetails,
-      FileUpload
+      FileUpload,
+      SkillDialog
     }
   })
 export default class Profile extends AuthComponent {
@@ -31,13 +33,11 @@ export default class Profile extends AuthComponent {
     public compiledMarkdown: string = "";
     public model: AccountProfile = new AccountProfile();
     public timezones: Array<string> = new Array<string>();
+    public techYears: Array<number> = new Array<number>();
     public birthYears: Array<number> = new Array<number>();
     public statuses: Array<ListItem<string>> = new Array<ListItem<string>>();
-    public techYears: Array<number> = new Array<number>();
-    public skillLevels: Array<ListItem<string>> = new Array<ListItem<string>>();
     public genders: Array<string> = new Array<string>();
     public languages: Array<string> = new Array<string>();
-    public skills: Array<string> = new Array<string>();
     public skillModel: Skill = new Skill();
     public isSkillAdd: boolean = false;
     public showDialog: boolean = false;
@@ -117,13 +117,13 @@ export default class Profile extends AuthComponent {
     }
 
     public OnAddSkill(): void {
-        this.isSkillAdd = true;
-        this.skillModel = new Skill();
+        let skill = new Skill();
+        
+        this.showSkillDialog(skill, true);
+    }
 
-        // Ensure any previous validation triggers have been removed
-        this.$validator.reset();
-
-        this.showDialog = true;
+    public OnEditSkill(skill: Skill): void {
+        this.showSkillDialog(skill, false);
     }
 
     public OnDeleteSkill(skill: Skill): void {
@@ -138,30 +138,14 @@ export default class Profile extends AuthComponent {
         this.model.skills = this.model.skills.filter(item => item.name !== skill.name);
     }
 
-    public OnEditSkill(skill: Skill): void {
-        this.isSkillAdd = false;
-        this.skillModel = skill;
-
-        // Ensure any previous validation triggers have been removed
-        this.$validator.reset();
-        
-        this.showDialog = true;
+    public OnSkillClose(): void {
+        this.showDialog = false;
     }
 
-    public async OnSaveSkill(): Promise<void> {
-        let isValid = await this.$validator.validateAll("skillForm");
-
-        if (!isValid) {
-            this.notify.showWarning("Oh no, there are some errors on the form. Please fix these and try again.");
-            
-            return;
-        }
-        
-        this.model.skills = this.model.skills || new Array<Skill>();
-
+    public OnSkillSave(skill: Skill): void {
         if (this.isSkillAdd) {
             // This is an add of a skill
-            this.model.skills.push(this.skillModel);
+            this.model.skills.push(skill);
         }
 
         this.showDialog = false;
@@ -321,10 +305,6 @@ export default class Profile extends AuthComponent {
         file.click();
     }
     
-    public OnAcceptCoCClick(event: Event): void {
-        console.log(this.model.acceptCoC);
-    }
-
     public OnViewCoCClick(event: Event): void {
         event.stopPropagation();
         event.preventDefault();
@@ -361,6 +341,13 @@ export default class Profile extends AuthComponent {
         }
     }
     
+    private showSkillDialog(skill: Skill, isSkillAdd: boolean) {
+        this.skillModel = skill;
+        this.isSkillAdd = isSkillAdd;
+
+        this.showDialog = true;
+    }
+
     private toTitleCase(value: string): string {
         return value.toLowerCase().split(" ").map((word) => {
             return word.replace(word[0], word[0].toUpperCase());
@@ -372,7 +359,6 @@ export default class Profile extends AuthComponent {
         this.birthYears = this.listsService.getBirthYears();
         this.techYears = this.listsService.getTechYears();
         this.statuses = this.listsService.getProfileStatuses();
-        this.skillLevels = this.listsService.getSkillLevels();
 
         let categories = await this.categoriesService.getCategories();
 
@@ -383,13 +369,6 @@ export default class Profile extends AuthComponent {
                 return item.name;
             });
 
-        this.skills = categories
-            .filter((item: Category) => {
-                return item.group === CategoryGroup.Skill;
-            }).map((item: Category) => {
-                return item.name;
-            });
-            
         this.genders = categories
             .filter((item: Category) => {
                 return item.group === CategoryGroup.Gender;
