@@ -2,7 +2,7 @@ import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { Skill } from "../../services/api/skill";
 import { INotify, Notify } from "../../services/notify";
-import { IListsService, ListsService, ListItem } from "../../services/lists";
+import { IListsService, ListsService, ListItem } from "../../services/listsService";
 import { ICategoriesService, CategoriesService, Category, CategoryGroup } from "../../services/api/categoriesService";
 
 @Component
@@ -61,10 +61,22 @@ export default class SkillDialog extends Vue {
             }).map((item: Category) => {
                 return item.name;
             });
+
+        this.SkillsChanged();
+        this.YearStartedChanged();
+        this.YearLastUsedChanged();
     }
 
     @Watch("usedSkills")
-    public SkillsChanged(): void {
+    public SkillsChanged(): void {        
+        if (!this.skills) {
+            return;
+        }
+
+        if (!this.usedSkills) {
+            return;
+        }
+
         this.availableSkills = this.skills.filter((skill: string) => {
             let matchingSkills = this.usedSkills.filter((usedSkill: Skill) => {
                 return skill.toLocaleUpperCase() === usedSkill.name.toLocaleUpperCase();

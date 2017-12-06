@@ -1,25 +1,21 @@
 import Component from "vue-class-component";
 import AuthComponent from "../../components/authComponent";
-import SkillDetails from "../../controls/skillDetails/skillDetails";
-import SkillDialog from "../../components/skillDialog/skillDialog.vue";
-import FileUpload from "vue-upload-component";
-import { IPhotoConfig, PhotoConfig } from "../../services/config/photoConfig";
-import { Skill } from "../../services/api/skill";
-import { IAccountProfileService, AccountProfileService, AccountProfile, ProfileStatus } from "../../services/api/accountProfileService";
+import ProfilePhoto from "../../controls/profilePhoto/profilePhoto.vue";
+import SkillList from "../../controls/skillList/skillList.vue";
+import AccountProfileAlerts from "../../controls/accountProfileAlerts/accountProfileAlerts.vue";
+import { IAccountProfileService, AccountProfileService, AccountProfile } from "../../services/api/accountProfileService";
 import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
-import { IListsService, ListsService, ListItem } from "../../services/lists";
+import { IListsService, ListsService, ListItem } from "../../services/listsService";
 import { ICategoriesService, CategoriesService, Category, CategoryGroup } from "../../services/api/categoriesService";
 import store from "store";
 import marked from "marked";
 
-const noPhotoModule = require("../../images/no_photo.svg");
-
 @Component({
     components: {
-      SkillDetails,
-      FileUpload,
-      SkillDialog
+      ProfilePhoto,
+      SkillList,
+      AccountProfileAlerts
     }
   })
 export default class Profile extends AuthComponent {
@@ -38,15 +34,7 @@ export default class Profile extends AuthComponent {
     public statuses: Array<ListItem<string>> = new Array<ListItem<string>>();
     public genders: Array<string> = new Array<string>();
     public languages: Array<string> = new Array<string>();
-    public skillModel: Skill = new Skill();
-    public isSkillAdd: boolean = false;
-    public showDialog: boolean = false;
-    public photoConfig: IPhotoConfig;
-    public photoUploadProgress: number | null = null;
-    public photoUri: string | null = null;
-    public noPhoto = noPhotoModule;
     public savingModel: boolean = false;
-    public uploadingPhoto: boolean = false;
 
     public constructor() {
         super();
@@ -55,11 +43,9 @@ export default class Profile extends AuthComponent {
         this.listsService = new ListsService();
         this.categoriesService = new CategoriesService();
         this.notify = new Notify();
-        this.photoConfig = new PhotoConfig();
     }
     
-    public configure(photoConfig: IPhotoConfig, profileService: IAccountProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
-        this.photoConfig = photoConfig;
+    public configure(profileService: IAccountProfileService, listsService: IListsService, categoriesService: ICategoriesService, notify: INotify) {
         this.profileService = profileService;
         this.listsService = listsService;
         this.categoriesService = categoriesService;
@@ -116,195 +102,10 @@ export default class Profile extends AuthComponent {
         }
     }
 
-    public OnAddSkill(): void {
-        let skill = new Skill();
-        
-        this.showSkillDialog(skill, true);
-    }
-
-    public OnEditSkill(skill: Skill): void {
-        this.showSkillDialog(skill, false);
-    }
-
-    public OnDeleteSkill(skill: Skill): void {
-        if (!this.model) {
-            return;
-        }
-
-        if (!this.model.skills) {
-            return;
-        }
-
-        this.model.skills = this.model.skills.filter(item => item.name !== skill.name);
-    }
-
-    public OnSkillClose(): void {
-        this.showDialog = false;
-    }
-
-    public OnSkillSave(skill: Skill): void {
-        if (this.isSkillAdd) {
-            // This is an add of a skill
-            this.model.skills.push(skill);
-        }
-
-        this.showDialog = false;
-    }
-
-    public OnPhotoFilter(newFile, oldFile, prevent): void {        
-        if (newFile && !oldFile) {
-            const maxKb = 256;
-            const failureMessage = "Please select a jpg/jpeg or png that is less than " + maxKb + "kb.";
-
-            if (newFile.size > (maxKb * 1024)) {
-                this.notify.showError(failureMessage);
-
-                return prevent();
-            }
-
-            if (!/\.(jpg|jpeg|png)$/i.test(newFile.name)) {
-                this.notify.showError(failureMessage);
-
-                return prevent();
-            }
-        }
-
-        if (newFile && (!oldFile || newFile.file !== oldFile.file)) {
-            newFile.url = "";
-            
-            let URL = window.URL || (<any>window).webkitURL;
-
-            if (URL && URL.createObjectURL) {
-                newFile.url = URL.createObjectURL(newFile.file);
-            }
-        }
-    }
-
-    public OnPhotoUploaded(newFile, oldFile): void {
-        if (!newFile) {
-            return;
-        }
-
-        let progress: number = 0;
-
-        if (newFile.progress) {
-            progress = parseInt(newFile.progress);
-        }
-
-        if (!newFile.active
-            && progress === 0) {
-            this.uploadingPhoto = true;
-            newFile.active = true;
-        }
-
-        this.photoUploadProgress = progress;
-        
-        // Check if the upload has hit a 401
-        if (newFile.xhr
-            && newFile.xhr.status) {
-             if (newFile.xhr.status === 401) {
-                // Looks like the users authentication session has expired
-
-                // Temporarily store the model to handle scenarios where the auth token has expired
-                // We don't want the user to loose their changes with an auth refresh
-                store.set("profile", this.model);
-                
-                // Sign in again
-                this.signIn();
-            } else if (this.photoUploadProgress === 100 && !newFile.active && newFile.xhr.status === 201) {
-                // The upload has completed successfully
-                this.photoUploadProgress = null;
-    
-                // Get response data
-                this.model.photoId = newFile.response.id;
-                this.model.photoHash = newFile.response.hash;
-    
-                this.BuildPhotoUri();
-                
-                this.uploadingPhoto = false;
-                this.notify.showSuccess("Successfully uploaded your photo. Don't forget to save your profile.");
-            } else if (newFile.xhr.status !== 201) {
-                // If this is 201 here then it is an event fired that we don't want to respond to
-                this.uploadingPhoto = false;
-                this.notify.showError("Failed to upload your photo. Please try again.");
-            }
-        }
-    }
-
-    public BuildPhotoUri(): void {
-        if (!this.model.photoId) {
-            this.photoUri = null;
-
-            return;
-        }
-
-        let uri = this.photoConfig.GetPhotoUri(this.model.id, this.model.photoId, this.model.photoHash);
-
-        this.photoUri = uri;
-    }
-
-    public isBanned(): boolean {
-        if (this.loading) {
-            return false;
-        }
-
-        if (this.model.bannedAt) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    public isHidden(): boolean {
-        if (this.loading) {
-            return false;
-        }
-
-        if (this.model.status === ProfileStatus.Hidden) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    public isSearchable(): boolean {
-        if (this.loading) {
-            return true;
-        }
-
-        if (this.model.status === ProfileStatus.Hidden) {
-            return false;
-        }
-        
-        if (this.model.gender) {
-            return true;
-        }
-        
-        if (this.model.languages && this.model.languages.length > 0) {
-            return true;
-        }
-        
-        if (this.model.skills && this.model.skills.length > 0) {
-            return true;
-        }
-        
-        return false;
-    }
-
     public ShowWebsite(uri: string): void {
         window.open(uri, "_blank");
     }
 
-    public OnPhotoSelect(): void {
-        let file = document.getElementById("photofile");
-        
-        if (!file) {
-            return;
-        }
-        
-        file.click();
-    }
-    
     public OnViewCoCClick(event: Event): void {
         event.stopPropagation();
         event.preventDefault();
@@ -312,14 +113,6 @@ export default class Profile extends AuthComponent {
         let element: HTMLAnchorElement = <HTMLAnchorElement>event.srcElement;
 
         window.open(element.href, element.target);
-    }
-
-    public OnRemovePhoto(): void {
-        this.model.photoHash = null;
-        this.model.photoId = null;
-        this.photoUri = null;
-
-        this.notify.showInformation("Your photo has been removed. Don't forget to save your profile.");
     }
 
     public CheckLanguages(languages: Array<string>): void {
@@ -341,13 +134,6 @@ export default class Profile extends AuthComponent {
         }
     }
     
-    private showSkillDialog(skill: Skill, isSkillAdd: boolean) {
-        this.skillModel = skill;
-        this.isSkillAdd = isSkillAdd;
-
-        this.showDialog = true;
-    }
-
     private toTitleCase(value: string): string {
         return value.toLowerCase().split(" ").map((word) => {
             return word.replace(word[0], word[0].toUpperCase());
@@ -394,8 +180,6 @@ export default class Profile extends AuthComponent {
             // Use a copy constructor to ensure that the type has all fields initialised
             this.model = new AccountProfile(profile);
 
-            this.BuildPhotoUri();
-            
             // Populate first name, last name and email from data store if the values are not found
             if (!this.model.email) {
                 this.model.email = this.$store.getters["email"];

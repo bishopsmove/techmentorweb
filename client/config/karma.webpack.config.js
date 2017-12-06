@@ -6,7 +6,7 @@ const rootPath = path.join(__dirname, "../../");
 
 module.exports = {
     name: "karma",
-    target: "node",
+    target: "web",
     output: {
         filename: "test/specs.js"
     },
@@ -31,6 +31,15 @@ module.exports = {
               options: {
                 esModule: true
               }
+            },
+            {
+                test: /\.svg$/,
+                loader: 'svg-inline-loader',
+                options: {
+                    classPrefix: true,
+                    idPrefix: true,
+                    removeSVGTagAttrs: true
+                }
             }
         ]
     },
