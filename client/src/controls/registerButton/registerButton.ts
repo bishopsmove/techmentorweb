@@ -1,8 +1,8 @@
 import { Component, Watch } from "vue-property-decorator";
-import SignInComponent from "../../components/signInComponent/signInComponent";
+import RegisterComponent from "../../components/registerComponent/registerComponent";
 
 @Component
-export default class AuthListTile extends SignInComponent {
+export default class RegisterButton extends RegisterComponent {
     public mounted(): void {
         this.EvaluateDisabled();
     }

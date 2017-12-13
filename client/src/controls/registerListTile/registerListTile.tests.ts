@@ -1,7 +1,7 @@
-import AuthListTile from "./authListTile";
+import RegisterListTile from "./registerListTile";
 
-describe("AuthListTile", () => {
-    let sut: AuthListTile;
+describe("RegisterListTile", () => {
+    let sut: RegisterListTile;
     let router: any;
     let signInTarget: string = "";
     let signInTargetUri: string = "";
@@ -10,7 +10,7 @@ describe("AuthListTile", () => {
         // Cancel out the console calls to avoid noisy logging in tests
         spyOn(console, "info");
 
-        sut = new AuthListTile();
+        sut = new RegisterListTile();
         signInTarget = "accountProfile";
         signInTargetUri = "/profile";
         

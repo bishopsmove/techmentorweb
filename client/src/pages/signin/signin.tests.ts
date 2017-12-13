@@ -17,6 +17,10 @@ describe("SignIn", () => {
     let sut: SignIn;
 
     beforeEach(() => {
+        // Cancel out the console calls to avoid noisy logging in tests
+        spyOn(console, "info");
+        spyOn(console, "warn");
+
         isAuthResponse = false;
         redirectUri = "https://website.info/profile";
         relativeRedirectUri = "/profile";
@@ -80,7 +84,16 @@ describe("SignIn", () => {
 
             await sut.OnLoad();
 
-            expect(service.Authenticate).toHaveBeenCalledWith(redirectUri);
+            expect(service.Authenticate).toHaveBeenCalledWith(redirectUri, undefined);
+        }));
+        it("authenticates with sign up when not authenticated and mode specified", core.runAsync(async () => {
+            spyOn(service, "Authenticate");
+
+            sut.$route.query.mode = "signUp";
+
+            await sut.OnLoad();
+
+            expect(service.Authenticate).toHaveBeenCalledWith(redirectUri, sut.$route.query.mode);
         }));
         it("processes authentication and redirects to specified uri", core.runAsync(async () => {
             isAuthResponse = true;

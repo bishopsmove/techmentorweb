@@ -57,21 +57,26 @@ export default class AuthComponent extends Vue {
         return false;
     }
 
-    public click(): void {
-        if (this.IsAuthenticated) {
-            this.signOut();
-        }
-        else {
-            this.signIn();
-        }
+    public register(): void {
+        this.redirectToSignIn("signUp");
     }
 
     public signIn(): void {
+        this.redirectToSignIn();
+    }
+
+    private redirectToSignIn(mode?: string): void {
         // Check if the current route has a sign in target
         let signInTarget = this.signInTarget();
 
+        let query = { redirectUri: signInTarget };
+
+        if (mode) {
+            query["mode"] = mode;
+        }
+
         // Redirect to the sign in page passing the sign in target
-        this.$router.push({name: "signin", query: { redirectUri: signInTarget }});
+        this.$router.push({name: "signin", query: query});
     }
 
     public signOut(): void {
@@ -139,13 +144,5 @@ export default class AuthComponent extends Vue {
         else {
             this.disabled = false;
         }
-    }
-
-    public get text(): string {
-        if (this.IsAuthenticated) {
-            return "Sign out";
-        }
-
-        return "Sign in";
     }
 }

@@ -12,6 +12,10 @@ describe("authComponent.ts", () => {
     let futureTime = new Date(Date.now() + 60000);
 
     beforeEach(function () {
+        // Cancel out the console calls to avoid noisy logging in tests
+        spyOn(console, "info");
+        spyOn(console, "warn");
+
         sut = new AuthComponent();
         
         href = "https://www.test.com/stuff?where=here";
@@ -118,26 +122,37 @@ describe("authComponent.ts", () => {
         });
     });
     
-    describe("click", () => {
-        it("invokes signIn when not authenticated", () => {
-            store.getters.idToken = undefined;
+    describe("register", () => {
+        it("authenticates with redirect to route sign in target when sign in target defined", () => {
+            spyOn(router, "push");
+            spyOn(router, "resolve").and.callThrough();
+            
+            sut.register();
 
-            spyOn(sut, "signIn");
-            spyOn(sut, "signOut");
-
-            sut.click();
-
-            expect(sut.signIn).toHaveBeenCalled();
-            expect(sut.signOut).not.toHaveBeenCalled();
+            expect(router.resolve.calls.argsFor(0)[0].name).toEqual(router.currentRoute.meta.signInTarget);
+            expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
+            expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(signInTargetUri);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toEqual("signUp");
         });
-        it("invokes signOut when authenticated", () => {
-            spyOn(sut, "signIn");
-            spyOn(sut, "signOut");
+        it("authenticates with redirect to current uri when current route lacks meta", () => {
+            spyOn(router, "push");
+            router.currentRoute.meta = undefined;
 
-            sut.click();
+            sut.register();           
 
-            expect(sut.signIn).not.toHaveBeenCalled();
-            expect(sut.signOut).toHaveBeenCalled();
+            expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
+            expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(href);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toEqual("signUp");
+        });
+        it("authenticates with redirect to current uri when sign in target not defined", () => {
+            spyOn(router, "push");
+            router.currentRoute.meta.signInTarget = undefined;
+
+            sut.register();           
+
+            expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
+            expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(href);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toEqual("signUp");
         });
     });
     
@@ -151,6 +166,7 @@ describe("authComponent.ts", () => {
             expect(router.resolve.calls.argsFor(0)[0].name).toEqual(router.currentRoute.meta.signInTarget);
             expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
             expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(signInTargetUri);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toBeUndefined();
         });
         it("authenticates with redirect to current uri when current route lacks meta", () => {
             spyOn(router, "push");
@@ -160,6 +176,7 @@ describe("authComponent.ts", () => {
 
             expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
             expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(href);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toBeUndefined();
         });
         it("authenticates with redirect to current uri when sign in target not defined", () => {
             spyOn(router, "push");
@@ -169,6 +186,7 @@ describe("authComponent.ts", () => {
 
             expect(router.push.calls.argsFor(0)[0].name).toEqual("signin");
             expect(router.push.calls.argsFor(0)[0].query.redirectUri).toEqual(href);
+            expect(router.push.calls.argsFor(0)[0].query.mode).toBeUndefined();
         });
     });
     
@@ -246,21 +264,6 @@ describe("authComponent.ts", () => {
             let actual = sut.disabled;
 
             expect(actual).toBeFalsy();
-        });
-    });
-    
-    describe("text", () => {
-        it("returns correct message when authenticated", () => {
-            let actual = sut.text;
-
-            expect(actual).toEqual("Sign out");
-        });
-        it("returns correct message when not authenticated", () => {
-            store.getters.idToken = undefined;
-
-            let actual = sut.text;
-
-            expect(actual).toEqual("Sign in");
         });
     });
 });
