@@ -26,6 +26,7 @@ router.get("*.map", function (req, res) {
 });
 
 const staticConfig = {
+    maxAge: 14400000,
     setHeaders: function(res, path, stat) {
         var contentType = mime.lookup(path);
 
