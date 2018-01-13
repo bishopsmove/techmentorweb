@@ -1,5 +1,4 @@
-import Vue from "vue";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import { Skill } from "../../services/api/skill";
 import { INotify, Notify } from "../../services/notify";
 import { IListsService, ListsService, ListItem } from "../../services/listsService";

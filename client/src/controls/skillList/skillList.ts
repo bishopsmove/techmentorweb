@@ -1,5 +1,4 @@
-import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Vue, Component, Prop } from "vue-property-decorator";
 import { Skill } from "../../services/api/skill";
 import SkillDetails from "../../controls/skillDetails/skillDetails";
 import SkillDialog from "../../components/skillDialog/skillDialog.vue";

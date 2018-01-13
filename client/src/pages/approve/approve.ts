@@ -1,5 +1,5 @@
-import Component from "vue-class-component";
 import Vue from "vue";
+import Component from "vue-class-component";
 import { IAdminCategoriesService, AdminCategoriesService, AdminCategory, AdminUpdateCategory } from "../../services/api/adminCategoriesService";
 
 @Component

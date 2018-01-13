@@ -1,5 +1,4 @@
-import { Component, Prop } from "vue-property-decorator";
-import Vue from "vue";
+import { Vue, Component, Prop } from "vue-property-decorator";
 import ProfileResult from "../../services/api/profileResult";
 
 @Component

@@ -1,5 +1,5 @@
-import Component from "vue-class-component";
 import Vue from "vue";
+import Component from "vue-class-component";
 import Failure from "../../services/failure";
 import { INotify, Notify } from "../../services/notify";
 import { IProfileService, ProfileService , CategoryFilter } from "../../services/api/profileService";
